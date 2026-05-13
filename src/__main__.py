@@ -27,7 +27,6 @@ def load_function_definitions(filepath: Path) -> List[FunctionDefinition]:
 
 
 def load_test_cases(filepath: Path) -> List[TestCase]:
-    # Similar logic for loading the prompts
     try:
         with open(filepath, 'r') as f:
             raw_data = json.load(f)
