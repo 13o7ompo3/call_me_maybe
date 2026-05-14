@@ -1,28 +1,45 @@
 from enum import Enum, auto
 from typing import Dict, List
-
+from .schemas import FunctionDefinition
 
 class State(Enum):
     EXPECT_OPEN_BRACE = auto()
     EXPECT_NAME_KEY = auto()
     EXPECT_FUNCTION_NAME = auto()
     EXPECT_PARAMS_KEY = auto()
-    EXPECT_ARGUMENTS = auto()
+
+    EXPECT_PARAM_KEY = auto()
+    EXPECT_PARAM_COLON = auto()
+    EXPECT_PARAM_VALUE = auto()
+    EXPECT_PARAM_COMMA_OR_CLOSE = auto()
 
 
 class JSONStateMachine:
-    def __init__(self, vocab_map: Dict[int, str], allowed_functions: List[str]):
+    def __init__(self, vocab_map: Dict[int, str], functions: List[FunctionDefinition]):
         print("Pre-computing AOT vocabulary masks...")
         self.vocab = vocab_map
-        self.allowed_functions = allowed_functions
+
+        self.functions_map = {f.name: f for f in functions}
+        self.allowed_functions = list(self.functions_map.keys())
         self.state = State.EXPECT_OPEN_BRACE
 
+        self.active_function: str = ""
+        self.remaining_params: List[str] = []
+        self.current_param_type: str = ""
+
+        # --- AOT Caches ---
         self.cache_open_brace = self._find_tokens_starting_with("{")
         self.cache_colon = self._find_tokens_starting_with(":")
+        self.cache_comma = self._find_tokens_starting_with(",")
+        self.cache_close_brace = self._find_tokens_starting_with("}")
 
         self.cache_name_key = self._build_prefix_cache('"name":')
         self.cache_params_key = self._build_prefix_cache(',"parameters":{')
-        self.cache_function_names = self._build_functions_cache(allowed_functions)
+        self.cache_function_names = self._build_functions_cache(self.allowed_functions)
+
+        # --- NEW: Type Caches ---
+        self.cache_numbers = self._build_number_cache()
+        self.cache_booleans = self._build_prefix_cache("true") | self._build_prefix_cache("false")
 
         print("[SUCCESS] FSM Caches built and ready.")
 
@@ -68,6 +85,16 @@ class JSONStateMachine:
                 master_cache[prefix].extend(ids)
                 master_cache[prefix] = list(set(master_cache[prefix]))
         return master_cache
+    
+    def _build_number_cache(self) -> List[int]:
+        """Pre-computes all tokens that are valid parts of a number."""
+        valid_ids = []
+        for tid, tok_str in self.vocab.items():
+            clean = tok_str.replace("Ġ", " ").replace("\u0120", " ").strip()
+            if all(c.isdigit() or c in ".-" for c in clean) and clean:
+                valid_ids.append(tid)
+        valid_ids.extend(self._find_tokens_starting_with(" ")) 
+        return list(set(valid_ids))
 
     def _get_already_emitted(self, target: str, emitted_text: str) -> str:
         """Finds how much of the target string we have successfully output so far."""
@@ -90,5 +117,23 @@ class JSONStateMachine:
 
         elif self.state == State.EXPECT_PARAMS_KEY:
             return self.cache_params_key.get(clean_chunk, [])
-
+        
+        elif self.state == State.EXPECT_PARAM_KEY:
+            target = f'"{self.remaining_params[0]}"'
+            temp_cache = self._build_prefix_cache(target)
+            return temp_cache.get(clean_chunk, [])
+            
+        elif self.state == State.EXPECT_PARAM_COLON:
+            return self.cache_colon
+            
+        elif self.state == State.EXPECT_PARAM_VALUE:
+            if self.current_param_type in ("number", "integer"):
+                return self.cache_numbers + self.cache_comma + self.cache_close_brace
+            elif self.current_param_type == "string":
+                return list(self.vocab.keys())
+                
+        elif self.state == State.EXPECT_PARAM_COMMA_OR_CLOSE:
+            if len(self.remaining_params) > 0:
+                return self.cache_comma
+            return self.cache_close_brace
         return []

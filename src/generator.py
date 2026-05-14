@@ -65,13 +65,41 @@ class ConstrainedGenerator:
 
         elif fsm.state == State.EXPECT_FUNCTION_NAME:
             for name in fsm.allowed_functions:
-                target = f'"{name}"'
-                if clean_chunk == target:
+                if clean_chunk == f'"{name}"':
+                    fsm.active_function = name
                     fsm.state = State.EXPECT_PARAMS_KEY
                     return True
 
         elif fsm.state == State.EXPECT_PARAMS_KEY and ',"parameters":{' in clean_chunk:
-            fsm.state = State.EXPECT_ARGUMENTS
+            func_def = fsm.functions_map[fsm.active_function]
+            fsm.remaining_params = list(func_def.parameters.keys())
+
+            if fsm.remaining_params:
+                fsm.state = State.EXPECT_PARAM_KEY
+            else:
+                fsm.state = State.EXPECT_PARAM_COMMA_OR_CLOSE
             return True
+
+        elif fsm.state == State.EXPECT_PARAM_KEY:
+            target = f'"{fsm.remaining_params[0]}"'
+            if clean_chunk == target:
+                fsm.state = State.EXPECT_PARAM_COLON
+                return True
+
+        elif fsm.state == State.EXPECT_PARAM_COLON and ":" in clean_chunk:
+            current_param = fsm.remaining_params.pop(0)
+            func_def = fsm.functions_map[fsm.active_function]
+            fsm.current_param_type = func_def.parameters[current_param].type
+
+            fsm.state = State.EXPECT_PARAM_VALUE
+            return True
+
+        elif fsm.state == State.EXPECT_PARAM_VALUE:
+            if clean_chunk.endswith(",") or clean_chunk.endswith("}"):
+                if len(fsm.remaining_params) > 0:
+                    fsm.state = State.EXPECT_PARAM_KEY
+                else:
+                    fsm.state = State.EXPECT_PARAM_COMMA_OR_CLOSE
+                return True
 
         return False
