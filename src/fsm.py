@@ -62,7 +62,7 @@ class JSONStateMachine:
             valid_ids = []
 
             for tid, tok_str in self.vocab.items():
-                clean = tok_str.replace("Ġ", " ").replace("\u0120", " ").lstrip()
+                clean = tok_str.replace("Ġ", " ").replace("\u0120", " ")
                 if not clean:
                     continue
 
