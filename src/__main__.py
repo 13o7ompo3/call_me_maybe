@@ -1,35 +1,32 @@
 import sys
 from pathlib import Path
-from src.loader import load_functions, load_prompts
-from src.vocab import Vocabulary
+from .loader import load_functions, load_prompts
+from .vocab import Vocabulary
+from .fsm import JSONStateMachine
 
 
 def main() -> None:
     print("Call Me Maybe Engine: Initialized.\n")
 
-    # 1. Load the Data Shield
-    functions_path = Path("data/input/functions_definition.json")
-    prompts_path = Path("data/input/function_calling_tests.json")
-
-    functions = load_functions(functions_path)
-    prompts = load_prompts(prompts_path)
-    print(f"[SUCCESS] Loaded {len(functions)} functions and {len(prompts)} prompts.\n")
-
-    # 2. Boot the Engine
+    functions = load_functions(Path("data/input/functions_definition.json"))
     vocab = Vocabulary()
-    print(f"[SUCCESS] Loaded {len(vocab.token_to_id)} tokens into memory.\n")
 
-    # 3. Prove we have the lookup table working!
-    crucial_chars = ["{", "}", '"name"', "Ġ{"] 
-    print("--- Critical Token IDs ---")
-    for char in crucial_chars:
-        tok_id = vocab.get_id(char)
-        print(f"Token '{char}' -> ID: {tok_id}")
+    allowed_names = [f.name for f in functions]
+
+    fsm = JSONStateMachine(vocab.id_to_token, allowed_names)
+
+    print("\n--- Cache Verification ---")
+
+    partial_string = '"na'
+    allowed_next_ids = fsm.cache_name_key.get(partial_string, [])
+
+    print(f"If generated text is '{partial_string}', allowed next tokens are:")
+    for tid in allowed_next_ids[:5]: # Just print the first 5 to avoid spam
+        print(f" -> ID: {tid} ('{vocab.id_to_token[tid]}')")
 
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\nProcess interrupted by user.")
         sys.exit(1)
