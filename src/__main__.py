@@ -13,9 +13,8 @@ def main() -> None:
     prompts = load_prompts(Path("data/input/function_calling_tests.json"))
     vocab = Vocabulary()
 
-    fsm = JSONStateMachine(vocab.id_to_token, functions)
-
     for test in prompts:
+        fsm = JSONStateMachine(vocab.id_to_token, functions)
         generator = ConstrainedGenerator(vocab.llm, vocab)
         generator.generate(test.prompt, fsm, functions)
 
