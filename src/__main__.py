@@ -16,7 +16,24 @@ def main() -> None:
 
     generator = ConstrainedGenerator(vocab.llm, vocab)
 
-    test_prompt = "What is the sum of 2 and 3?"
+    test_prompt = 'You are a function calling system. Choose the correct function to answer the user prompt.\
+Available functions:\
+    "name": "fn_add_numbers",\
+    "description": "Add two numbers together and return their sum.",\
+\
+    "name": "fn_greet",\
+    "description": "Generate a greeting message for a person by name.",\
+\
+    "name": "fn_reverse_string",\
+    "description": "Reverse a string and return the reversed result.",\
+\
+    "name": "fn_get_square_root",\
+    "description": "Calculate the square root of a number.",\
+\
+    "name": "fn_substitute_string_with_regex",\
+    "description": "Replace all occurrences matching a regex pattern in a string.",\
+User Prompt: What is the sum of 2 and 3?\
+JSON Output:'
 
     generator.generate(test_prompt, fsm)
 
