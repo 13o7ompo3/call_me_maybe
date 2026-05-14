@@ -46,9 +46,6 @@ class ConstrainedGenerator:
                 emitted_chunk = ""
             self._advance_state(fsm, emitted_chunk)
 
-            if fsm.state == State.EXPECT_ARGUMENTS:
-                break
-
         print("\n[GENERATION COMPLETE]")
         return generated_text
 
