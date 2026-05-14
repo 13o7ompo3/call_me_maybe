@@ -13,7 +13,7 @@ class ConstrainedGenerator:
         print(f"\n[GENERATION START] Prompt: '{prompt}'")
         input_tensor = self.llm.encode(prompt)
         current_ids: List[int] = input_tensor.tolist()[0]
-        
+
         generated_text = ""
         emitted_chunk = ""
 
@@ -39,9 +39,11 @@ class ConstrainedGenerator:
             current_ids.append(next_token_id)
             generated_text += clean_str
             emitted_chunk += clean_str
-            
+
             print(clean_str, end="", flush=True)
 
+            if self._advance_state(fsm, emitted_chunk):
+                emitted_chunk = ""
             self._advance_state(fsm, emitted_chunk)
 
             if fsm.state == State.EXPECT_FUNCTION_NAME:
@@ -50,10 +52,25 @@ class ConstrainedGenerator:
         print("\n[GENERATION COMPLETE]")
         return generated_text
 
-    def _advance_state(self, fsm: JSONStateMachine, emitted_chunk: str) -> None:
-        """Shifts the FSM state once a target string is fully emitted."""
+    def _advance_state(self, fsm: JSONStateMachine, emitted_chunk: str) -> bool:
+        """Returns True if the state transitioned, signaling the generator to clear the chunk."""
         if fsm.state == State.EXPECT_OPEN_BRACE and "{" in emitted_chunk:
             fsm.state = State.EXPECT_NAME_KEY
-
+            return True
+            
         elif fsm.state == State.EXPECT_NAME_KEY and '"name":' in emitted_chunk:
             fsm.state = State.EXPECT_FUNCTION_NAME
+            return True
+            
+        elif fsm.state == State.EXPECT_FUNCTION_NAME:
+            for name in fsm.allowed_functions:
+                target = f' "{name}"'
+                if emitted_chunk == target:
+                    fsm.state = State.EXPECT_PARAMS_KEY
+                    return True
+                    
+        elif fsm.state == State.EXPECT_PARAMS_KEY and ',"parameters":{' in emitted_chunk:
+            fsm.state = State.EXPECT_ARGUMENTS
+            return True
+            
+        return False
