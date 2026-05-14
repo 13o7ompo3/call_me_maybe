@@ -3,6 +3,7 @@ from pathlib import Path
 from .loader import load_functions, load_prompts
 from .vocab import Vocabulary
 from .fsm import JSONStateMachine
+from .generator import ConstrainedGenerator
 
 
 def main() -> None:
@@ -12,17 +13,13 @@ def main() -> None:
     vocab = Vocabulary()
 
     allowed_names = [f.name for f in functions]
-
     fsm = JSONStateMachine(vocab.id_to_token, allowed_names)
 
-    print("\n--- Cache Verification ---")
+    generator = ConstrainedGenerator(vocab.llm, vocab)
 
-    partial_string = '"na'
-    allowed_next_ids = fsm.cache_name_key.get(partial_string, [])
+    test_prompt = "What is the sum of 2 and 3?"
 
-    print(f"If generated text is '{partial_string}', allowed next tokens are:")
-    for tid in allowed_next_ids[:5]: # Just print the first 5 to avoid spam
-        print(f" -> ID: {tid} ('{vocab.id_to_token[tid]}')")
+    generator.generate(test_prompt, fsm)
 
 
 if __name__ == "__main__":
