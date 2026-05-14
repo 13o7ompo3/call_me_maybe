@@ -66,7 +66,7 @@ class JSONStateMachine:
                 if not clean:
                     continue
 
-                if remaining.startswith(clean) or clean.startswith(remaining):
+                if remaining.startswith(clean):
                     valid_ids.append(tid)
 
             cache[already_emitted] = valid_ids
