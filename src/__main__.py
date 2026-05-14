@@ -18,7 +18,7 @@ def main() -> None:
     generator = ConstrainedGenerator(vocab.llm, vocab)
 
     for test in prompts:
-        generator.generate(test["prompt"], fsm, functions)
+        generator.generate(test.prompt, fsm, functions)
 
 
 if __name__ == "__main__":
