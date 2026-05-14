@@ -10,7 +10,7 @@ def main() -> None:
     print("Call Me Maybe Engine: Initialized.\n")
 
     functions = load_functions(Path("data/input/functions_definition.json"))
-    prompts = load_prompts(Path("data/input/test_cases.json"))
+    prompts = load_prompts(Path("data/input/function_calling_tests.json"))
     vocab = Vocabulary()
 
     fsm = JSONStateMachine(vocab.id_to_token, functions)
