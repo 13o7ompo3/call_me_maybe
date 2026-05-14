@@ -9,7 +9,7 @@ class ConstrainedGenerator:
         self.llm = llm
         self.vocab = vocab
 
-    def generate(self, prompt: str, fsm: JSONStateMachine, max_tokens: int = 300) -> str:
+    def generate(self, prompt: str, fsm: JSONStateMachine, max_tokens: int = 100) -> str:
         print(f"\n[GENERATION START] Prompt: '{prompt}'")
         input_tensor = self.llm.encode(prompt)
         current_ids: List[int] = input_tensor.tolist()[0]
