@@ -15,9 +15,8 @@ def main() -> None:
 
     fsm = JSONStateMachine(vocab.id_to_token, functions)
 
-    generator = ConstrainedGenerator(vocab.llm, vocab)
-
     for test in prompts:
+        generator = ConstrainedGenerator(vocab.llm, vocab)
         generator.generate(test.prompt, fsm, functions)
 
 
