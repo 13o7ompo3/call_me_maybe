@@ -18,7 +18,7 @@ def main() -> None:
 
     test_prompt = "What is the sum of 2 and 3?"
 
-    generator.generate(test_prompt, fsm)
+    generator.generate(test_prompt, fsm, functions)
 
 
 if __name__ == "__main__":
