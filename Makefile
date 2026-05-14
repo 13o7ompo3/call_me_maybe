@@ -5,7 +5,7 @@ SRC_DIR = src
 all: install run
 
 add:
-	@UV_CACHE_DIR="$(HOME)/$(CACHE_DIR)" $(PACKAGE_MANAGER) add pydantic numpy ./llm_sdk
+	@UV_CACHE_DIR="$(HOME)/$(CACHE_DIR)" $(PACKAGE_MANAGER) add pydantic numpy ./llm_sdk accelerate
 	@UV_CACHE_DIR="$(HOME)/$(CACHE_DIR)" $(PACKAGE_MANAGER) add --dev flake8 mypy
 
 install:
