@@ -12,8 +12,7 @@ def main() -> None:
     functions = load_functions(Path("data/input/functions_definition.json"))
     vocab = Vocabulary()
 
-    allowed_names = [f.name for f in functions]
-    fsm = JSONStateMachine(vocab.id_to_token, allowed_names)
+    fsm = JSONStateMachine(vocab.id_to_token, functions)
 
     generator = ConstrainedGenerator(vocab.llm, vocab)
 
