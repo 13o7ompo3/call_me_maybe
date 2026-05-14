@@ -53,24 +53,25 @@ class ConstrainedGenerator:
         return generated_text
 
     def _advance_state(self, fsm: JSONStateMachine, emitted_chunk: str) -> bool:
-        """Returns True if the state transitioned, signaling the generator to clear the chunk."""
-        if fsm.state == State.EXPECT_OPEN_BRACE and "{" in emitted_chunk:
+        clean_chunk = emitted_chunk.lstrip()
+
+        if fsm.state == State.EXPECT_OPEN_BRACE and "{" in clean_chunk:
             fsm.state = State.EXPECT_NAME_KEY
             return True
-            
-        elif fsm.state == State.EXPECT_NAME_KEY and '"name":' in emitted_chunk:
+
+        elif fsm.state == State.EXPECT_NAME_KEY and '"name":' in clean_chunk:
             fsm.state = State.EXPECT_FUNCTION_NAME
             return True
-            
+
         elif fsm.state == State.EXPECT_FUNCTION_NAME:
             for name in fsm.allowed_functions:
-                target = f' "{name}"'
-                if emitted_chunk == target:
+                target = f'"{name}"'
+                if clean_chunk == target:
                     fsm.state = State.EXPECT_PARAMS_KEY
                     return True
-                    
-        elif fsm.state == State.EXPECT_PARAMS_KEY and ',"parameters":{' in emitted_chunk:
+
+        elif fsm.state == State.EXPECT_PARAMS_KEY and ',"parameters":{' in clean_chunk:
             fsm.state = State.EXPECT_ARGUMENTS
             return True
-            
+
         return False

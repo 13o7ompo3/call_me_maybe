@@ -59,7 +59,7 @@ class JSONStateMachine:
         """Pre-computes masks for every possible valid function name, wrapped in quotes."""
         master_cache: Dict[str, List[int]] = {}
         for func_name in allowed_functions:
-            target = f' "{func_name}"' 
+            target = f'"{func_name}"' 
             func_cache = self._build_prefix_cache(target)
             
             for prefix, ids in func_cache.items():
@@ -67,7 +67,6 @@ class JSONStateMachine:
                     master_cache[prefix] = []
                 master_cache[prefix].extend(ids)
                 master_cache[prefix] = list(set(master_cache[prefix]))
-                
         return master_cache
 
     def _get_already_emitted(self, target: str, emitted_text: str) -> str:
@@ -78,15 +77,18 @@ class JSONStateMachine:
         return ""
 
     def get_valid_token_ids(self, emitted_chunk: str) -> List[int]:
+        clean_chunk = emitted_chunk.lstrip()
+
         if self.state == State.EXPECT_OPEN_BRACE:
             return self.cache_open_brace
-            
+
         elif self.state == State.EXPECT_NAME_KEY:
-            return self.cache_name_key.get(emitted_chunk, [])
-            
+            return self.cache_name_key.get(clean_chunk, [])
+
         elif self.state == State.EXPECT_FUNCTION_NAME:
-            return self.cache_function_names.get(emitted_chunk, [])
-            
+            return self.cache_function_names.get(clean_chunk, [])
+
         elif self.state == State.EXPECT_PARAMS_KEY:
-            return self.cache_params_key.get(emitted_chunk, [])
+            return self.cache_params_key.get(clean_chunk, [])
+
         return []
