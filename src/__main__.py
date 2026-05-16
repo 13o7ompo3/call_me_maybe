@@ -14,7 +14,7 @@ def main() -> None:
     vocab = Vocabulary()
 
     for test in prompts:
-        cache = RouterCache(vocab.vocab_map, [f.name for f in functions])
+        cache = RouterCache(vocab.id_to_token, [f.name for f in functions])
         generator = RoutingGenerator(vocab.llm, vocab)
         chosen_function = generator.route(test.prompt, cache, functions)
         print(f"Final Decision: '{chosen_function}'\n{'-'*50}\n")
