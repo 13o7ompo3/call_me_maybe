@@ -1,27 +1,73 @@
 import sys
+import json
+import time
 from pathlib import Path
+
 from src.loader import load_functions, load_prompts
 from src.vocab import Vocabulary
-from src.generator import RoutingGenerator
 from src.cache import RouterCache
+from src.generator import RoutingGenerator
+from src.extractor import ExtractionGenerator
 
 
 def main() -> None:
     print("Call Me Maybe Engine: Initialized.\n")
 
-    functions = load_functions(Path("data/input/functions_definition.json"))
-    prompts = load_prompts(Path("data/input/function_calling_tests.json"))
-    vocab = Vocabulary()
+    # 1. Paths & Folders
+    input_dir = Path("data/input")
+    output_dir = Path("data/output")
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    for test in prompts:
-        cache = RouterCache(vocab.id_to_token, [f.name for f in functions])
-        generator = RoutingGenerator(vocab.llm, vocab)
-        chosen_function = generator.route(test.prompt, cache, functions)
-        print(f"Final Decision: '{chosen_function}'\n{'-'*50}\n")
+    functions = load_functions(input_dir / "functions_definition.json")
+    functions_map = {f.name: f for f in functions}
+    prompts = load_prompts(input_dir / "function_calling_tests.json")
+
+    # 2. Boot the Engines
+    vocab = Vocabulary()
+    cache = RouterCache(vocab.id_to_token, list(functions_map.keys()))
+
+    router = RoutingGenerator(vocab.llm, vocab)
+    extractor = ExtractionGenerator(vocab.llm, vocab)
+
+    # 3. The Batch Pipeline
+    results = []
+    start_time = time.time()
+
+    print(f"\n--- Processing {len(prompts)} Test Cases ---")
+    for i, test_case in enumerate(prompts):
+        print(f"\n[{i+1}/{len(prompts)}] Query: {test_case.prompt}")
+
+        # Phase 1: High-Speed Mathematical Routing
+        chosen_func_name = router.route(test_case.prompt, cache, functions)
+
+        # Phase 2: XML Data Extraction
+        extracted_args = extractor.extract(test_case.prompt, chosen_func_name,
+                                           functions_map[chosen_func_name])
+
+        # Phase 3: Assembly
+        final_json = {
+            "prompt": test_case.prompt,
+            "name": chosen_func_name,
+            "parameters": extracted_args
+        }
+        results.append(final_json)
+
+    # 4. Save to Disk
+    output_path = output_dir / "function_calling_results.json"
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(results, f, indent=2)
+
+    elapsed = time.time() - start_time
+    print(f"\n=========================================")
+    print(f"[SUCCESS] Engine Shutdown.")
+    print(f"Processed {len(prompts)} prompts in {elapsed:.2f} seconds.")
+    print(f"File saved to: {output_path}")
+    print(f"=========================================")
 
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
+        print("\n[ABORT] Process killed by user.")
         sys.exit(1)
