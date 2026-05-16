@@ -10,9 +10,10 @@ def build_routing_prompt(user_query: str, functions: List[FunctionDefinition]
     """
     prompt = (
         "ROUTING ENGINE MODE ACTIVE.\n"
+        "You are a function calling system."
         "Read the user query and output "
         "EXACTLY AND ONLY the name of the correct function.\n"
-        "Do not explain. Do not output JSON. Do not output parameters.\n\n"
+        "\n\n"
     )
 
     prompt += "AVAILABLE FUNCTIONS:\n"
