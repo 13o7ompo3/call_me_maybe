@@ -18,7 +18,7 @@ def build_routing_prompt(user_query: str, functions: List[FunctionDefinition]
 
     prompt += "AVAILABLE FUNCTIONS:\n"
     for f in functions:
-        prompt += f"- {f.name}: {f.description}\n"
+        prompt += f"- {f.name}: {f.description}\n, returns {f.return_type}\n"
 
     prompt += f"\nUSER QUERY: {user_query}\n"
 
