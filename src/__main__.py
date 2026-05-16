@@ -1,9 +1,9 @@
 import sys
 from pathlib import Path
-from .loader import load_functions, load_prompts
-from .vocab import Vocabulary
-from .fsm import JSONStateMachine
-from .generator import ConstrainedGenerator
+from src.loader import load_functions, load_prompts
+from src.vocab import Vocabulary
+from src.generator import RoutingGenerator
+from src.cache import RouterCache
 
 
 def main() -> None:
@@ -14,9 +14,10 @@ def main() -> None:
     vocab = Vocabulary()
 
     for test in prompts:
-        fsm = JSONStateMachine(vocab.id_to_token, functions)
-        generator = ConstrainedGenerator(vocab.llm, vocab)
-        generator.generate(test.prompt, fsm, functions)
+        cache = RouterCache(vocab.vocab_map, [f.name for f in functions])
+        generator = RoutingGenerator(vocab.llm, vocab)
+        chosen_function = generator.route(test.prompt, cache, functions)
+        print(f"Final Decision: '{chosen_function}'\n{'-'*50}\n")
 
 
 if __name__ == "__main__":
