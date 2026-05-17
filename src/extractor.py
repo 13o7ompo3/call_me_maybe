@@ -20,7 +20,7 @@ class ExtractionGenerator:
             "PARAMETERS TO EXTRACT:\n"
         )
         for p_name, p_data in func_def.parameters.items():
-            prompt += f"- {p_name} ({p_data.type})\n"
+            prompt += f"- name: {p_name}, type: {p_data.type}\n"
 
         prompt += "\nEXAMPLES:\n"
         prompt += "Query: 'What is the square root of 81?'\n<a>81</a>\n"
