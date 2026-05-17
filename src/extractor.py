@@ -19,8 +19,8 @@ class ExtractionGenerator:
             JUST COPY THE RAW VALUES FROM THE TEXT.\n\n"
             "PARAMETERS TO EXTRACT:\n"
         )
-        for p_name, p_data in func_def.parameters.items():
-            prompt += f"- name: {p_name}, type: {p_data.type}\n"
+        for i, (p_name, p_data) in enumerate(func_def.parameters.items()):
+            prompt += f"-{i + 1}. name: {p_name}, type: {p_data.type}\n"
 
         prompt += "\nEXAMPLES:\n"
         prompt += "Query: 'What is the square root of 81?'\n<a>81</a>\n"
