@@ -14,13 +14,17 @@ class ExtractionGenerator:
                       func_def: FunctionDefinition) -> Tuple[str, str]:
         prompt = (
             "EXTRACTION ENGINE MODE ACTIVE.\n"
-            f"Extract the arguments for '{func_name}' based on the user query."
-            "\nWrap each extracted value in its exact XML tag."
-            "Do not output anything else.\n\n"
-            "REQUIRED ARGUMENTS:\n"
+            f"Extract the exact values for '{func_name}' from the user query."
+            "\nCRITICAL: DO NOT SOLVE THE PROBLEM. \
+            JUST COPY THE RAW VALUES FROM THE TEXT.\n\n"
+            "PARAMETERS TO EXTRACT:\n"
         )
         for p_name, p_data in func_def.parameters.items():
-            prompt += f"<{p_name}> ({p_data.type})\n"
+            prompt += f"- {p_name} ({p_data.type})\n"
+
+        prompt += "\nEXAMPLES:\n"
+        prompt += "Query: 'What is the square root of 81?'\n<a>81</a>\n"
+        prompt += "Query: 'Greet Alice'\n<name>Alice</name>\n"
 
         prompt += f"\nUSER QUERY: {user_query}\nOUTPUT FORMAT:\n"
         for p_name in func_def.parameters.keys():
