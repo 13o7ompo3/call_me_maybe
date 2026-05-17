@@ -4,11 +4,11 @@ from typing import Dict, List, Literal, Any
 
 # --- 1. Schemas for functions_definition.json ---
 class ParameterDef(BaseModel):
-    type: Literal["string", "number", "boolean"]
+    type: Literal["string", "number", "boolean", "integer"]
 
 
 class ReturnDef(BaseModel):
-    type: Literal["string", "number", "boolean"]
+    type: Literal["string", "number", "boolean", "integer"]
 
 
 class FunctionDefinition(BaseModel):
