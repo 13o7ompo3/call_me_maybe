@@ -17,8 +17,11 @@ class ExtractionGenerator:
             f"Extract the exact values for '{func_name}' from the user query."
             "\nCRITICAL: DO NOT SOLVE THE PROBLEM. \
             JUST COPY THE RAW VALUES FROM THE TEXT.\n\n"
-            "PARAMETERS TO EXTRACT:\n"
         )
+        prompt += f"Function: {func_name}\n"
+        prompt += f"Description: {func_def.description}\n"
+        prompt += f"Returns: {func_def.returns}\n"
+        prompt += "PARAMETERS TO EXTRACT:\n"
         for i, (p_name, p_data) in enumerate(func_def.parameters.items()):
             prompt += f"- name: {p_name}, type: {p_data.type}\n"
 
