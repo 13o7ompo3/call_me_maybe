@@ -56,13 +56,13 @@ class ExtractionGenerator:
             logits = self.llm.get_logits_from_input_ids(current_ids)
             next_id = int(np.argmax(logits))
             clean_str = self.vocab.id_to_token[next_id].replace(
-                "Ġ", " ").replace("\u0120", " ")
+                "Ġ", " ").replace("\u0120", " ").replace("Ċ", "\n")
 
             current_ids.append(next_id)
             generated_text += clean_str
             print(clean_str, end="", flush=True)
 
-            if generated_text.endswith(end_marker):
+            if end_marker in generated_text:
                 break
 
         print("\n[EXTRACTION COMPLETE]")
