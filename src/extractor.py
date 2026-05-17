@@ -20,7 +20,7 @@ class ExtractionGenerator:
             "PARAMETERS TO EXTRACT:\n"
         )
         for i, (p_name, p_data) in enumerate(func_def.parameters.items()):
-            prompt += f"-{i + 1}. name: {p_name}, type: {p_data.type}\n"
+            prompt += f"- name: {p_name}, type: {p_data.type}\n"
 
         prompt += "\nEXAMPLES:\n"
         prompt += "Query: 'What is the square root of 81?'\n<a>81</a>\n"
