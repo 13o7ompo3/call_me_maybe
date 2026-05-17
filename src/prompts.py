@@ -10,18 +10,22 @@ def build_routing_prompt(user_query: str, functions: List[FunctionDefinition]
     """
     prompt = (
         "ROUTING ENGINE MODE ACTIVE.\n"
-        "You are a function calling system."
-        "Read the user query and output "
-        "EXACTLY AND ONLY the name of the correct function.\n"
-        "\n\n"
+        "Read the user query, extract 3 keywords to understand the intent,\
+         then output the function name.\n"
+        "Do not explain. Use the exact format: \
+        keyword1, keyword2, keyword3 | fn_name\n\n"
+        "AVAILABLE FUNCTIONS:\n"
     )
 
-    prompt += "AVAILABLE FUNCTIONS:\n"
     for f in functions:
         prompt += f"- {f.name}: {f.description}\n, returns {f.returns}\n"
 
+    prompt += "\nEXAMPLES:\n"
+    prompt += "Query: 'Say hello to Alice'\n\
+    ANALYSIS: greeting, welcome, person | fn_function\n"
+
     prompt += f"\nUSER QUERY: {user_query}\n"
 
-    prompt += "SELECTED FUNCTION: fn_"
+    prompt += "ANALYSIS: "
 
     return prompt
