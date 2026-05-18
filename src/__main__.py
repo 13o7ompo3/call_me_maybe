@@ -10,6 +10,21 @@ from src.generator import RoutingGenerator
 from src.extractor import ExtractionGenerator
 
 
+ARGUMENT_HINTS = {
+    "fn_substitute_string_with_regex": {
+        "source_string": "The FINAL, completed sentence after the substitution has been made.",
+        "regex": "The mathematical search pattern (e.g., \\d+, [a-z], or the exact word to be replaced).",
+        "replacement": "The exact new text that is being inserted."
+    },
+    "fn_read_file": {
+        "path": "The absolute, complete file path, including all directories and slashes (e.g., /home/user/file.txt)."
+    },
+    "fn_format_template": {
+        "template": "The FULL sentence provided by the user, strictly including the curly braces {}."
+    }
+}
+
+
 def main() -> None:
     print("Call Me Maybe Engine: Initialized.\n")
 
@@ -27,7 +42,7 @@ def main() -> None:
     cache = RouterCache(vocab.id_to_token, list(functions_map.keys()))
 
     router = RoutingGenerator(vocab.llm, vocab)
-    extractor = ExtractionGenerator(vocab.llm, vocab)
+    extractor = ExtractionGenerator(vocab.llm, vocab, ARGUMENT_HINTS)
 
     # 3. The Batch Pipeline
     results = []

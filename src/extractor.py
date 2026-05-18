@@ -6,9 +6,11 @@ from src.schemas import FunctionDefinition
 
 
 class ExtractionGenerator:
-    def __init__(self, llm: Small_LLM_Model, vocab: Vocabulary):
+    def __init__(self, llm: Small_LLM_Model, vocab: Vocabulary,
+                 hints: Dict[str, Dict[str, str]]):
         self.llm = llm
         self.vocab = vocab
+        self.hints = hints
 
     def _build_prompt(self, user_query: str, func_name: str,
                       func_def: FunctionDefinition) -> Tuple[str, str]:
@@ -24,6 +26,8 @@ class ExtractionGenerator:
         prompt += "PARAMETERS TO EXTRACT:\n"
         for i, (p_name, p_data) in enumerate(func_def.parameters.items()):
             prompt += f"- name: {p_name}, type: {p_data.type}\n"
+            if self.hints.get(func_name, {}).get(p_name):
+                prompt += f"  hint: {self.hints[func_name][p_name]}\n"
 
         prompt += "\nEXAMPLES:\n"
         prompt += "Query: 'What is the square root of 81?'\n<a>81</a>\n"
