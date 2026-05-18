@@ -16,9 +16,9 @@ class ExtractionGenerator:
                       func_def: FunctionDefinition) -> Tuple[str, str]:
         prompt = (
             "EXTRACTION ENGINE MODE ACTIVE.\n"
-            f"Extract the exact values for '{func_name}' from the user query."
-            "\nCRITICAL: DO NOT SOLVE THE PROBLEM. \
-            JUST COPY THE RAW VALUES FROM THE TEXT.\n\n"
+            f"Extract the exact arguments from the user query "
+            f"that will be passed to the '{func_name}' function."
+            f".\n\n"
         )
         prompt += f"Function: {func_name}\n"
         prompt += f"Description: {func_def.description}\n"
