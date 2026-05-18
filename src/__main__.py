@@ -18,7 +18,7 @@ ARGUMENT_HINTS = {
         "path": "The absolute, complete file path, including all directories and slashes (e.g., /home/user/file.txt)."
     },
     "fn_format_template": {
-        "template": "The FULL sentence provided by the user, strictly including the curly braces {}."
+        "template": "The FULL template provided by the user, strictly including the curly braces {}. example: 'Say Hello to {name}'"
     }
 }
 
