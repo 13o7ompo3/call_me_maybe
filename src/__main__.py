@@ -12,6 +12,7 @@ from src.extractor import ExtractionGenerator
 
 ARGUMENT_HINTS = {
     "fn_substitute_string_with_regex": {
+        "source_string": "The string that contains the text to be replaced",
         "regex": "The mathematical search pattern. '[a-zA-Z]' for letters, '\\d+' for numbers, the exact character or word to be replaced.",
     },
     "fn_read_file": {
