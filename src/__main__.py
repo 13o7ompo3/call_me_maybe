@@ -12,7 +12,7 @@ from src.extractor import ExtractionGenerator
 
 ARGUMENT_HINTS = {
     "fn_substitute_string_with_regex": {
-        "source_string": "The FINAL, completed sentence after the substitution has been made.",
+        "source_string": "The original target text that the user wants to modify or search within.",
         "regex": "The mathematical search pattern (e.g., \\d+, [a-z], or the exact word to be replaced).",
         "replacement": "The exact new text that is being inserted."
     },
