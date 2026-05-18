@@ -15,7 +15,7 @@ ARGUMENT_HINTS = {
         "number": "The value that will be used to calculate the square root."
     },
     "fn_substitute_string_with_regex": {
-        "source_string": "a string that part of it will be replaced if it matches the regex pattern.",
+        "source_string": "The string that will be matched against the regex pattern.",
         "regex": "The mathematical search pattern. '[a-zA-Z]' for letters, '\\d+' for numbers, the exact character or word to be replaced.",
     },
     "fn_read_file": {
