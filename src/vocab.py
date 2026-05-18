@@ -4,9 +4,12 @@ from llm_sdk import Small_LLM_Model
 
 
 class Vocabulary:
-    def __init__(self) -> None:
+    def __init__(self, llm_model: str | None = None) -> None:
         print("Booting the LLM Engine...")
-        self.llm = Small_LLM_Model()
+        if llm_model is not None:
+            self.llm = Small_LLM_Model(model_name=llm_model)
+        else:
+            self.llm = Small_LLM_Model()
 
         self.token_to_id: dict[str, int] = {}
         self.id_to_token: dict[int, str] = {}

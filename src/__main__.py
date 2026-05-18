@@ -3,11 +3,11 @@ import json
 import time
 from pathlib import Path
 
-from src.loader import load_functions, load_prompts
-from src.vocab import Vocabulary
-from src.cache import RouterCache
-from src.generator import RoutingGenerator
-from src.extractor import ExtractionGenerator
+from .loader import load_functions, load_prompts
+from .vocab import Vocabulary
+from .cache import RouterCache
+from .generator import RoutingGenerator
+from .extractor import ExtractionGenerator
 
 
 ARGUMENT_HINTS = {
@@ -44,7 +44,8 @@ def main() -> None:
     cache = RouterCache(vocab.id_to_token, list(functions_map.keys()))
 
     router = RoutingGenerator(vocab.llm, vocab)
-    extractor = ExtractionGenerator(vocab.llm, vocab, ARGUMENT_HINTS)
+    vocab_coder = Vocabulary("prithivMLmods/rStar-Coder-Qwen3-0.6B")
+    extractor = ExtractionGenerator(vocab_coder.llm, vocab_coder, ARGUMENT_HINTS)
 
     # 3. The Batch Pipeline
     results = []
