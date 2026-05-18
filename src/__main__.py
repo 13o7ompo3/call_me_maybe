@@ -12,10 +12,10 @@ from src.extractor import ExtractionGenerator
 
 ARGUMENT_HINTS = {
     "fn_square_root": {
-        "number": "The value given from the user that the function will calculate the square root of it."
+        "number": "The value given from the user query that the function will calculate the square root of."
     },
     "fn_substitute_string_with_regex": {
-        "source_string": "The string that the user wants to modify.",
+        "source_string": "The string that will be matched against the regex pattern.",
         "regex": "The mathematical search pattern. '[a-zA-Z]' for letters, '\\d+' for numbers, the exact character or word to be replaced.",
     },
     "fn_read_file": {
