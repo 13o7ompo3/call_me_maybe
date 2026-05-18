@@ -12,7 +12,7 @@ from src.extractor import ExtractionGenerator
 
 ARGUMENT_HINTS = {
     "fn_substitute_string_with_regex": {
-        "regex": "The mathematical search pattern. use '\\d+' for numbers or '[a-zA-Z]' for letters or the exact character or word to be replaced.",
+        "regex": "The mathematical search pattern. '[a-zA-Z]' for letters, '\\d+' for numbers, the exact character or word to be replaced.",
     },
     "fn_read_file": {
         "path": "The absolute, complete file path, including all directories and slashes (e.g., /home/user/file.txt)."
