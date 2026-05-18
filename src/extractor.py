@@ -95,7 +95,7 @@ class ExtractionGenerator:
 
                 if p_data.type in ("number", "integer"):
                     try:
-                        result[p_name] = float(val_str) if "." in val_str else int(val_str)
+                        result[p_name] = float(val_str)
                     except ValueError:
                         result[p_name] = 0
                 else:

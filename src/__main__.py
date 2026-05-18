@@ -12,9 +12,7 @@ from src.extractor import ExtractionGenerator
 
 ARGUMENT_HINTS = {
     "fn_substitute_string_with_regex": {
-        "source_string": "The original target text that the user wants to modify or search within.",
-        "regex": "The mathematical search pattern (e.g., \\d+, [a-z], or the exact word to be replaced).",
-        "replacement": "The exact new text that is being inserted."
+        "regex": "The mathematical search pattern. use '\\d+', '[a-zA-Z]', or the exact word to be replaced.",
     },
     "fn_read_file": {
         "path": "The absolute, complete file path, including all directories and slashes (e.g., /home/user/file.txt)."
