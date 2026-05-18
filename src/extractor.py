@@ -95,10 +95,12 @@ class ExtractionGenerator:
 
                 if p_data.type in ("number", "integer"):
                     try:
-                        result[p_name] = float(val_str)
+                        result[p_name] = float(val_str) if p_data.type == "number" else int(val_str)
                     except ValueError:
                         result[p_name] = 0
                 else:
                     result[p_name] = val_str
+            else:
+                result[p_name] = 0 if p_data.type in ("number", "integer") else ""
 
         return result
