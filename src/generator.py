@@ -18,6 +18,8 @@ class RoutingGenerator:
         input_tensor = self.llm.encode(injected_prompt)
         current_ids: List[int] = input_tensor.tolist()[0]
 
+        probable_functions = {fn.name: fn.name for fn in functions}
+
         generated_text = ""
 
         print(f"\n[ROUTING] Query: '{user_query}'")
@@ -51,11 +53,14 @@ class RoutingGenerator:
             print(clean_str, end="", flush=True)
 
             if "|" in generated_text:
-                current_attempt = generated_text.split("|")[1].lstrip()
-                if current_attempt in cache.allowed_functions:
-                    print("\n[ROUTING COMPLETE] Target Acquired.")
-                    return current_attempt
-
-        if "|" in generated_text:
-            return generated_text.split("|")[1].strip()
+                for fn_name, remaining in probable_functions.items():
+                    if remaining.startswith(clean_str):
+                        probable_functions[fn_name] = remaining[len(clean_str):]
+                    else:
+                        del probable_functions[fn_name]
+                if len(probable_functions) == 1:
+                    return list(probable_functions.keys())[0]
+                if len(probable_functions) == 0:
+                    print("\n[ERROR] No valid functions remain.")
+                    break
         return "fn_unknown"
