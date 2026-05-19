@@ -44,8 +44,7 @@ def main() -> None:
     cache = RouterCache(vocab.id_to_token, list(functions_map.keys()))
 
     router = RoutingGenerator(vocab.llm, vocab)
-    vocab_coder = Vocabulary("prithivMLmods/rStar-Coder-Qwen3-0.6B")
-    extractor = ExtractionGenerator(vocab_coder.llm, vocab_coder, ARGUMENT_HINTS)
+    extractor = ExtractionGenerator(vocab.llm, vocab, ARGUMENT_HINTS)
 
     # 3. The Batch Pipeline
     results = []

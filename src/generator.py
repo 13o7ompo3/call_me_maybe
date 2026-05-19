@@ -53,7 +53,7 @@ class RoutingGenerator:
             print(clean_str, end="", flush=True)
 
             if "|" in generated_text:
-                for fn_name, remaining in probable_functions.items():
+                for fn_name, remaining in probable_functions.copy().items():
                     if remaining.startswith(clean_str):
                         probable_functions[fn_name] = remaining[len(clean_str):]
                     else:
