@@ -58,8 +58,11 @@ def main() -> None:
         chosen_func_name = router.route(test_case.prompt, cache, functions)
 
         # Phase 2: XML Data Extraction
-        extracted_args = extractor.extract(test_case.prompt, chosen_func_name,
-                                           functions_map[chosen_func_name])
+        extracted_args = {}
+        if chosen_func_name != "fn_unknown":
+            extracted_args = extractor.extract(test_case.prompt,
+                                               chosen_func_name,
+                                               functions_map[chosen_func_name])
 
         # Phase 3: Assembly
         final_json = {
