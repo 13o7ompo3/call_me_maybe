@@ -175,4 +175,5 @@ class Moulinette:
 
 
 if __name__ == "__main__":
-    fire.Fire(Moulinette)
+    Moulinette().prepare_exercises(set="public")
+#    fire.Fire(Moulinette)
