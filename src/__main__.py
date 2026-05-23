@@ -16,13 +16,13 @@ ARGUMENT_HINTS = {
     },
     "fn_substitute_string_with_regex": {
         "source_string": "The string that will be matched against the regex pattern.",
-        "regex": "The mathematical search pattern. '[a-zA-Z]' for letters, '\\d+' for numbers, the exact character or word to be replaced.",
+        "regex": "The mathematical search pattern. '[a-zA-Z]' for set of letters, '\\d+' for numbers, the exact character or word to be replaced.",
     },
     "fn_read_file": {
-        "path": "The absolute, complete file path, including all directories and slashes (e.g., /home/user/file.txt)."
+        "path": "The absolute, complete file path, including all directories and slashes /home/user/file.txt."
     },
     "fn_format_template": {
-        "template": "The FULL template provided by the user, strictly including the curly braces {}. example: 'Say Hello to {name}'"
+        "template": "The template provided by the user, strictly including the curly braces {}. example: 'Say Hello to {name}'"
     }
 }
 
