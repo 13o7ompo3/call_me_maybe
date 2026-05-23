@@ -154,9 +154,9 @@ class ExtractionGenerator:
         if ":" in user_query:
             parts = user_query.split(":")
             ret.append({part.strip(): part.strip() for part in parts})
-        quoted_targets = re.findall(r'["\'](.*?)["\']', user_query)
+        quoted_targets = re.findall(r'["\'](.*?)\1', user_query)
         if quoted_targets:
-            ret.append({qt.strip(): qt.strip() for qt in quoted_targets})
+            ret.append({qt.strip(): qt.strip() for qt in quoted_targets[1:]})
         clean_numbers = re.findall(r'\b\d+\.?\d+\b', user_query)
         if clean_numbers:
             ret.append({num: num for num in clean_numbers})
