@@ -157,5 +157,8 @@ class ExtractionGenerator:
         quoted_targets = re.findall(r'["\'](.*?)["\']', user_query)
         if quoted_targets:
             ret.append({qt.strip(): qt.strip() for qt in quoted_targets})
+        clean_numbers = re.findall(r'\b\d+\.?\d+\b', user_query)
+        if clean_numbers:
+            ret.append({num: num for num in clean_numbers})
         ret.append({word: word for word in user_query.split()})
         return ret
