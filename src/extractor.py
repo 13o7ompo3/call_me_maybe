@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 from typing import Dict, Any, Tuple
 from llm_sdk import Small_LLM_Model
 from src.vocab import Vocabulary
@@ -59,7 +60,7 @@ class ExtractionGenerator:
         current_index = 0
         argument = ""
         self.probable_argument = self.get_probable_argument(user_query)
-        probable_argument = self.probable_argument.copy()
+        probable_argument = copy.deepcopy(self.probable_argument)
 
         # Initialize with our pre-filled tag
         generated_text = f"<{keys[0]}>"
@@ -85,20 +86,19 @@ class ExtractionGenerator:
                     else:
                         del level[p_name]
                 if len(level) == 1:
-                    # 1. Get the actual surviving key and value (Ignore the leaked loop variables!)
                     surviving_key = list(level.keys())[0]
                     surviving_remainder = level[surviving_key]
-    
-                    # 2. Use the REAL XML tag from your schema, not the dictionary key!
+
                     real_xml_tag = keys[current_index]
-    
-                    # 3. Build the correct prediction
+
                     prediction = f"{surviving_remainder}</{real_xml_tag}>\n"
 
                     tokens = self.llm.encode(prediction).tolist()[0]
                     current_ids.extend(tokens)
                     generated_text += prediction
                     print(prediction, end="", flush=True)
+                    probable_argument.remove(level)
+                    break
                 if len(level) == 0:
                     probable_argument.remove(level)
 
@@ -107,7 +107,7 @@ class ExtractionGenerator:
             if generated_text.strip().endswith(target_end_tag):
                 current_index += 1
                 argument = ""
-                probable_argument = self.get_probable_argument(user_query)
+                probable_argument = copy.deepcopy(self.probable_argument)
 
                 if current_index == len(keys):
                     print("Extraction complete!")
