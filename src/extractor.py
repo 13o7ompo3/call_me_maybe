@@ -107,7 +107,7 @@ class ExtractionGenerator:
             if generated_text.strip().endswith(target_end_tag):
                 current_index += 1
                 argument = ""
-                probable_argument = self.probable_argument.copy()
+                probable_argument = self.get_probable_argument(user_query)
 
                 if current_index == len(keys):
                     print("Extraction complete!")
