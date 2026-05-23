@@ -78,9 +78,10 @@ class ExtractionGenerator:
             argument += clean_str
             print(clean_str, end="", flush=True)
 
-            stripped_token = clean_str.lstrip()
+            # stripped_token = clean_str.lstrip()
             for level in probable_argument:
                 for p_name, p_remaining in level.copy().items():
+                    stripped_token = clean_str.lstrip() if p_remaining == p_name else clean_str
                     if p_remaining.startswith(stripped_token):
                         level[p_name] = p_remaining[len(stripped_token):]
                     else:
