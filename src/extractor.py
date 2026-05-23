@@ -73,7 +73,7 @@ class ExtractionGenerator:
                 "Ġ", " ").replace("\u0120", " ").replace("Ċ", "\n")
 
             current_ids.append(next_id)
-            generated_text += clean_str
+            generated_text += clean_str.lstrip()
             argument += clean_str
             print(clean_str, end="", flush=True)
 
