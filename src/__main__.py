@@ -16,7 +16,7 @@ ARGUMENT_HINTS = {
     },
     "fn_substitute_string_with_regex": {
         "source_string": "The exact target text to be modified, strictly excluding instruction words like 'Replace' or 'Substitute'. It is the text inside the quotes.",
-        "regex": "The mathematical search pattern. '[0-9a-zA-Z]' for set of characters, or the exact word to be replaced example: 'old_word'.",
+        "regex": "The mathematical search pattern. '[0-9a-zA-Z]' for set of characters, or the exact word to be replaced.",
         "replacement": "The exact character or word that will replace the matched regex pattern. example: '*'."
     },
     "fn_read_file": {

@@ -82,7 +82,7 @@ class ExtractionGenerator:
             for level in probable_argument:
                 for p_name, p_remaining in level.copy().items():
                     if p_remaining.lstrip().startswith(stripped_token):
-                        level[p_name] = p_remaining[len(stripped_token):].lstrip()
+                        level[p_name] = p_remaining[len(stripped_token):]
                     else:
                         del level[p_name]
                 if len(level) == 1:
@@ -99,6 +99,9 @@ class ExtractionGenerator:
                     print(prediction, end="", flush=True)
                     probable_argument.remove(level)
                     break
+                else:
+                    for p_name, p_remaining in level.copy().items():
+                        level[p_name] = p_remaining[len(stripped_token):].lstrip()
                 if len(level) == 0:
                     probable_argument.remove(level)
 
