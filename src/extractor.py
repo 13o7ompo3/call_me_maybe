@@ -81,7 +81,7 @@ class ExtractionGenerator:
             stripped_token = clean_str.lstrip()
             for level in probable_argument:
                 for p_name, p_remaining in level.copy().items():
-                    if p_remaining.startswith(stripped_token):
+                    if p_remaining.lstrip().startswith(stripped_token):
                         level[p_name] = p_remaining[len(stripped_token):]
                     else:
                         del level[p_name]
