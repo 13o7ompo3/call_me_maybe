@@ -38,7 +38,7 @@ class FunctionCallingPipeline:
         functions_map = {f.name: f for f in functions}
 
         vocab = Vocabulary()
-        cache = RouterCache(vocab.id_to_token, list(functions.keys()))
+        cache = RouterCache(vocab.id_to_token, list(functions_map.keys()))
 
         router = RoutingGenerator(vocab.llm, vocab)
         extractor = ExtractionGenerator(vocab.llm, vocab, ARGUMENT_HINTS)
