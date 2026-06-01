@@ -22,7 +22,7 @@ class RoutingGenerator:
 
         generated_text = ""
 
-        print(f"\n[ROUTING] Query: '{user_query}'")
+        print(f"\n- Prompt: '{user_query}'")
         print("ANALYSIS:", end="", flush=True)
 
         for step in range(40):
@@ -35,7 +35,6 @@ class RoutingGenerator:
                 allowed_ids = cache.get_valid_token_ids(after_pipe)
 
                 if not allowed_ids:
-                    print("\n[ERROR] Model hallucinated invalid token.")
                     break
 
                 mask = np.full(len(logits), -np.inf)
@@ -61,6 +60,5 @@ class RoutingGenerator:
                 if len(probable_functions) == 1:
                     return list(probable_functions.keys())[0]
                 if len(probable_functions) == 0:
-                    print("\n[ERROR] No valid functions remain.")
                     break
         return "fn_unknown"

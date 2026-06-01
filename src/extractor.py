@@ -64,7 +64,7 @@ class ExtractionGenerator:
 
         # Initialize with our pre-filled tag
         generated_text = f"<{keys[0]}>"
-        print(f"\n[EXTRACTION] {generated_text}", end="", flush=True)
+        print(f"[EXTRACTION]\n{generated_text}", end="", flush=True)
 
         # Standard greedy decoding loop
         for step in range(100):
@@ -113,7 +113,7 @@ class ExtractionGenerator:
                 probable_argument = copy.deepcopy(self.probable_argument)
 
                 if current_index == len(keys):
-                    print("Extraction complete!")
+                    print("\nExtraction complete!")
                     break
 
                 next_tag = f"<{keys[current_index]}>"
@@ -123,7 +123,6 @@ class ExtractionGenerator:
                 current_ids.extend(new_tokens)
                 print(next_tag, end="", flush=True)
 
-        print("\n[EXTRACTION COMPLETE]")
         return self._parse_xml(generated_text, func_def)
 
     def _parse_xml(self, xml_string: str, func_def: FunctionDefinition
