@@ -4,7 +4,8 @@ ARGUMENT_HINTS = {
 that the function will calculate the square root of."
     },
     "fn_substitute_string_with_regex": {
-        "source_string": "The target string to be modified.\
+        "source_string": "The exact target text to be modified,\
+ strictly excluding instruction words like 'Replace' or 'Substitute'.\
  It is the text inside the quotes.",
         "regex": "The mathematical search pattern. \
 '[0-9a-zA-Z]' for set of characters, or the exact word to be replaced.",
@@ -20,7 +21,3 @@ the matched regex pattern. example: '*'."
 strictly including the curly braces {}. example: 'Say Hello to {name}'"
     }
 }
-
-#         "source_string": "The exact target text to be modified,\
-#  strictly excluding instruction words like 'Replace' or 'Substitute'.\
-#  It is the text inside the quotes.",
