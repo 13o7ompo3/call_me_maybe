@@ -22,7 +22,7 @@ def build_routing_prompt(user_query: str, functions: List[FunctionDefinition]
 
     prompt += "\nEXAMPLES:\n"
     prompt += "Query: 'Say hello to Alice'\n\
-ANALYSIS: greeting, welcome, person | fn_function\n"
+    ANALYSIS: greeting, welcome, person | fn_function\n"
 
     prompt += f"\nUSER QUERY: {user_query}\n"
 
