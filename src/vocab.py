@@ -33,7 +33,3 @@ class Vocabulary:
         except Exception as e:
             print(f"Error loading tokenizer: {e}")
             sys.exit(1)
-
-    def get_id(self, string_val: str) -> int:
-        """Returns the ID for a string, or -1 if it doesn't exist."""
-        return self.token_to_id.get(string_val, -1)

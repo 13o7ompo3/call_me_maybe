@@ -53,9 +53,9 @@ class RoutingGenerator:
             print(clean_str, end="", flush=True)
 
             if "|" in generated_text and not clean_str.strip() in ["", "|"]:
-                for fn_name, remaining in probable_functions.copy().items():
-                    if remaining.startswith(clean_str):
-                        probable_functions[fn_name] = remaining[len(clean_str):]
+                for fn_name, remain in probable_functions.copy().items():
+                    if remain.startswith(clean_str):
+                        probable_functions[fn_name] = remain[len(clean_str):]
                     else:
                         del probable_functions[fn_name]
                 if len(probable_functions) == 1:

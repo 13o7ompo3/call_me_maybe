@@ -3,11 +3,11 @@ import sys
 from pathlib import Path
 from pydantic import ValidationError
 from src.schemas import FunctionDefinition, TestCase
-from typing import Callable, Any
+from typing import Callable, Any, Dict
 
 
-def error_and_exit(function: Callable[[Path], Any]) -> Callable[[Path], Any]:
-    def wrapper(*args, **kwargs):
+def error_and_exit(function: Callable[[str], Any]) -> Callable[[str], Any]:
+    def wrapper(*args: Any, **kwargs: Dict[str, Any]) -> Any:
         try:
             filepath = args[0] if args else kwargs.get('filepath')
             return function(*args, **kwargs)
@@ -27,14 +27,26 @@ def error_and_exit(function: Callable[[Path], Any]) -> Callable[[Path], Any]:
 
 
 @error_and_exit
-def load_functions(filepath: Path) -> list[FunctionDefinition]:
+def load_functions(filepath: str) -> list[FunctionDefinition]:
     with open(filepath, 'r') as f:
         raw_data = json.load(f)
     return [FunctionDefinition(**item) for item in raw_data]
 
 
 @error_and_exit
-def load_prompts(filepath: Path) -> list[TestCase]:
+def load_prompts(filepath: str) -> list[TestCase]:
     with open(filepath, 'r') as f:
         raw_data = json.load(f)
     return [TestCase(**item) for item in raw_data]
+
+
+def save_results(filepath: str, data: list[Dict[str, Any]]) -> None:
+    path = Path(filepath).parent
+    path.mkdir(parents=True, exist_ok=True)
+    try:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2)
+    except Exception as e:
+        print(f"Error: Failed to save results to '{filepath}'.")
+        print(e)
+        sys.exit(1)

@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field, ValidationError
-from typing import Dict, List, Literal, Any
+from pydantic import BaseModel
+from typing import Dict, Literal, Any
 
 
 # --- 1. Schemas for functions_definition.json ---

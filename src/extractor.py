@@ -1,6 +1,6 @@
 import numpy as np
 import copy
-from typing import Dict, Any, Tuple
+from typing import Dict, Any
 from llm_sdk import Small_LLM_Model
 from src.vocab import Vocabulary
 from src.schemas import FunctionDefinition
@@ -41,7 +41,7 @@ class ExtractionGenerator:
 
         prompt += "\nVALUES:\n"
 
-        first_tag = list(func_def.parameters.keys())[0] if func_def.parameters else ""
+        first_tag = list(func_def.parameters.keys())[0]
         if first_tag:
             prompt += f"<{first_tag}>"
 
@@ -100,8 +100,8 @@ class ExtractionGenerator:
                     probable_argument.remove(level)
                     break
                 else:
-                    for p_name, p_remaining in level.copy().items():
-                        level[p_name] = p_remaining[len(stripped_token):].lstrip()
+                    for p_name, p_remaining in level.items():
+                        level[p_name] = p_remaining.lstrip()
                 if len(level) == 0:
                     probable_argument.remove(level)
 
@@ -137,22 +137,26 @@ class ExtractionGenerator:
             s_idx = xml_string.find(start_tag)
             e_idx = xml_string.find(end_tag)
 
+            f = {"number": float, "integer": int}.get(p_data.type, str)
             if s_idx != -1 and e_idx != -1:
                 val_str = xml_string[s_idx + len(start_tag):e_idx].strip()
 
                 if p_data.type in ("number", "integer"):
                     try:
-                        result[p_name] = float(val_str) if p_data.type == "number" else int(val_str)
+                        result[p_name] = f(val_str)
                     except ValueError:
-                        result[p_name] = 0
+                        result[p_name] = f(0)
                 else:
                     result[p_name] = val_str
             else:
-                result[p_name] = 0 if p_data.type in ("number", "integer") else ""
+                if p_data.type in ("number", "integer"):
+                    result[p_name] = f(0)
+                else:
+                    result[p_name] = ""
 
         return result
 
-    def get_probable_argument(self, user_query: str):
+    def get_probable_argument(self, user_query: str) -> list[Dict[str, str]]:
         ret = []
         if ":" in user_query:
             parts = user_query.split(":")
