@@ -64,7 +64,7 @@ class ExtractionGenerator:
 
         # Initialize with our pre-filled tag
         generated_text = f"<{keys[0]}>"
-        print(f"[EXTRACTION]\n{generated_text}", end="", flush=True)
+        print(f"[EXTRACTION]\n\n{generated_text}", end="", flush=True)
 
         # Standard greedy decoding loop
         for step in range(100):

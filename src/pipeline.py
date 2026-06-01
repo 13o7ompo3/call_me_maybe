@@ -48,11 +48,11 @@ class FunctionCallingPipeline:
 
         print(f"\n--- Processing {len(prompts)} Test Cases ---")
         for i, test_case in enumerate(prompts):
-            print(f"\n[{i+1}/{len(prompts)}] Processing: {test_case.prompt}")
+            print(f"[{i+1}/{len(prompts)}] Processing: {test_case.prompt}")
 
             # Phase 1: Function name extraction
             chosen_func_name = router.route(test_case.prompt, cache, functions)
-            print(f"\n  → function: {chosen_func_name}")
+            print(f"\n  → function: {chosen_func_name}\n")
 
             # Phase 2: Argument extraction
             extracted_args = {}
@@ -61,7 +61,7 @@ class FunctionCallingPipeline:
                                                    chosen_func_name,
                                                    functions_map[
                                                        chosen_func_name])
-            print(f"\n  → arguments: {extracted_args}")
+            print(f"\n  → arguments: {extracted_args}\n")
 
             final_json = {
                 "prompt": test_case.prompt,
