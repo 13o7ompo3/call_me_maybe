@@ -23,7 +23,7 @@ class RoutingGenerator:
         generated_text = ""
 
         print(f"\n- Prompt: '{user_query}'")
-        print("ANALYSIS:", end="", flush=True)
+        print("\nANALYSIS:", end="", flush=True)
 
         for step in range(40):
             logits = self.llm.get_logits_from_input_ids(current_ids)

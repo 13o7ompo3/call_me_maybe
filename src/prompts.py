@@ -11,9 +11,9 @@ def build_routing_prompt(user_query: str, functions: List[FunctionDefinition]
     prompt = (
         "ROUTING ENGINE MODE ACTIVE.\n"
         "Read the user query, extract 3 keywords to understand the intent,\
-         then output the function name.\n"
+ then output the function name.\n"
         "Do not explain. Use the exact format: \
-        keyword1, keyword2, keyword3 | fn_name\n\n"
+keyword1, keyword2, keyword3 | fn_name\n\n"
         "AVAILABLE FUNCTIONS:\n"
     )
 
@@ -22,7 +22,7 @@ def build_routing_prompt(user_query: str, functions: List[FunctionDefinition]
 
     prompt += "\nEXAMPLES:\n"
     prompt += "Query: 'Say hello to Alice'\n\
-    ANALYSIS: greeting, welcome, person | fn_function\n"
+ANALYSIS: greeting, welcome, person | fn_function\n"
 
     prompt += f"\nUSER QUERY: {user_query}\n"
 
