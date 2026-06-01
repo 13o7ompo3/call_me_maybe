@@ -52,6 +52,7 @@ class FunctionCallingPipeline:
 
             # Phase 1: Function name extraction
             chosen_func_name = router.route(test_case.prompt, cache, functions)
+            print(f"\n  → function: {chosen_func_name}")
 
             # Phase 2: Argument extraction
             extracted_args = {}
@@ -60,6 +61,7 @@ class FunctionCallingPipeline:
                                                    chosen_func_name,
                                                    functions_map[
                                                        chosen_func_name])
+            print(f"\n  → arguments: {extracted_args}")
 
             final_json = {
                 "prompt": test_case.prompt,
