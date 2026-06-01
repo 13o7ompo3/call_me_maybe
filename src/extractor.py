@@ -19,8 +19,8 @@ class ExtractionGenerator:
         prompt = (
             "EXTRACTION ENGINE MODE ACTIVE.\n"
             f"Extract the exact arguments for '{func_name}' function "
-            "from the user query.\nDO NOT SOLVE THE PROBLEM. \
-            JUST COPY THE RAW arguments FROM THE QUERY.\n\n"
+            "from the user query.\nDO NOT SOLVE THE PROBLEM. "
+            "JUST COPY THE RAW arguments FROM THE QUERY.\n\n"
         )
         prompt += f"Function: {func_name}\n"
         prompt += f"Description: {func_def.description}\n"
