@@ -1,6 +1,6 @@
 import numpy as np
 from typing import List
-from llm_sdk import Small_LLM_Model
+from llm_sdk.llm_sdk import Small_LLM_Model
 from src.vocab import Vocabulary
 from src.cache import RouterCache
 from src.schemas import FunctionDefinition

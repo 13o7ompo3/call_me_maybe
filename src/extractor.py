@@ -1,7 +1,7 @@
 import numpy as np
 import copy
 from typing import Dict, Any
-from llm_sdk import Small_LLM_Model
+from llm_sdk.llm_sdk import Small_LLM_Model
 from src.vocab import Vocabulary
 from src.schemas import FunctionDefinition
 import re
