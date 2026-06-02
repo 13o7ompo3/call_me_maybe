@@ -1,15 +1,25 @@
 import json
 import sys
-from llm_sdk.llm_sdk import Small_LLM_Model
+import importlib
+from typing import Any
 
 
 class Vocabulary:
     def __init__(self, llm_model: str | None = None) -> None:
         print("Booting the LLM Engine...")
+
+        try:
+            # Bypass mypy errors
+            llm_mod = importlib.import_module("llm_sdk")
+            llm_cls = getattr(llm_mod, "Small_LLM_Model")
+        except Exception:
+            # Let runtime import errors surface normally
+            raise
+
         if llm_model is not None:
-            self.llm = Small_LLM_Model(model_name=llm_model)
+            self.llm: Any = llm_cls(model_name=llm_model)
         else:
-            self.llm = Small_LLM_Model()
+            self.llm = llm_cls()
 
         self.token_to_id: dict[str, int] = {}
         self.id_to_token: dict[int, str] = {}

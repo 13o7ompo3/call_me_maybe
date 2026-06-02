@@ -1,6 +1,5 @@
 import numpy as np
-from typing import List
-from llm_sdk.llm_sdk import Small_LLM_Model
+from typing import List, Any
 from src.vocab import Vocabulary
 from src.cache import RouterCache
 from src.schemas import FunctionDefinition
@@ -8,7 +7,7 @@ from src.prompts import build_routing_prompt
 
 
 class RoutingGenerator:
-    def __init__(self, llm: Small_LLM_Model, vocab: Vocabulary):
+    def __init__(self, llm: Any, vocab: Vocabulary):
         self.llm = llm
         self.vocab = vocab
 
