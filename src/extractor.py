@@ -7,14 +7,58 @@ import re
 
 
 class ExtractionGenerator:
+    """Extract function arguments from a user query with constrained decoding.
+
+    Args:
+        llm (Any): Language model wrapper used for tokenization and
+            logits.
+        vocab (Vocabulary): Vocabulary helper that maps token IDs to strings.
+        hints (Dict[str, Dict[str, str]]): Optional per-function extraction
+            hints keyed by function and parameter name.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+
     def __init__(self, llm: Any, vocab: Vocabulary,
                  hints: Dict[str, Dict[str, str]]):
+        """Store the model, vocabulary, and extraction hints.
+
+        Args:
+            llm (Any): Language model wrapper used for inference.
+            vocab (Vocabulary): Vocabulary helper that maps token IDs to
+                strings.
+            hints (Dict[str, Dict[str, str]]): Optional extraction hints.
+
+        Returns:
+            None.
+
+        Raises:
+            None.
+        """
         self.llm = llm
         self.vocab = vocab
         self.hints = hints
 
     def _build_prompt(self, user_query: str, func_name: str,
                       func_def: FunctionDefinition) -> str:
+        """Build the prompt used to extract arguments for one function.
+
+        Args:
+            user_query (str): Natural-language query from the user.
+            func_name (str): Name of the function being extracted.
+            func_def (FunctionDefinition): Function schema that defines
+                the expected parameters and return type.
+
+        Returns:
+            str: Prompt instructing the model to emit XML-like argument tags.
+
+        Raises:
+            None.
+        """
         prompt = (
             "EXTRACTION ENGINE MODE ACTIVE.\n"
             f"Extract the exact arguments for '{func_name}' function "
@@ -48,6 +92,20 @@ class ExtractionGenerator:
 
     def extract(self, user_query: str, func_name: str,
                 func_def: FunctionDefinition) -> Dict[str, Any]:
+        """Extract typed arguments for a selected function.
+
+        Args:
+            user_query (str): Natural-language query from the user.
+            func_name (str): Name of the function to extract arguments for.
+            func_def (FunctionDefinition): Function schema describing
+                the parameter names and types.
+
+        Returns:
+            Dict[str, Any]: Parsed arguments keyed by parameter name.
+
+        Raises:
+            None.
+        """
         if not func_def.parameters:
             return {}
 
@@ -126,7 +184,20 @@ class ExtractionGenerator:
 
     def _parse_xml(self, xml_string: str, func_def: FunctionDefinition
                    ) -> Dict[str, Any]:
-        """Safely slices the XML string into a clean Python Dictionary."""
+        """Parse the generated XML-like text into a typed parameter mapping.
+
+        Args:
+            xml_string (str): Generated XML-like text containing parameters.
+            func_def (FunctionDefinition): Function schema used to
+                coerce types.
+
+        Returns:
+            Dict[str, Any]: Parsed parameter values with types coerced when
+            possible.
+
+        Raises:
+            None.
+        """
         result: Dict[str, Any] = {}
         for p_name, p_data in func_def.parameters.items():
             start_tag = f"<{p_name}>"
@@ -155,6 +226,19 @@ class ExtractionGenerator:
         return result
 
     def get_probable_argument(self, user_query: str) -> list[Dict[str, str]]:
+        """Build candidate argument substrings from the user query.
+
+        Args:
+            user_query (str): Natural-language query that may contain
+                likely argument values.
+
+        Returns:
+            list[Dict[str, str]]: Ordered candidate maps used to bias
+            argument extraction.
+
+        Raises:
+            None.
+        """
         ret = []
         if ":" in user_query:
             parts = user_query.split(":")

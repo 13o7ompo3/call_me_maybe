@@ -17,12 +17,12 @@ debug:
 	@HF_HOME="$(HOME)/$(CACHE_DIR)" uv run python3 -m pdb -m $(SRC_DIR)
 
 clean:
-	@rm -rf pycache
+	@find . -type d -name "__pycache__" -exec rm -rf {} +
 	@rm -rf .mypy_cache
 
 lint:
-	@uv run flake8 $(SRC_DIR)/$(wildcard .py)
-	@uv run mypy $(SRC_DIR)/$(wildcard.py) \
+	@uv run flake8 src/
+	@uv run mypy src/ \
 		--warn-return-any \
 		--warn-unused-ignores \
 		--ignore-missing-imports \
@@ -30,8 +30,5 @@ lint:
 		--check-untyped-defs
 
 lint-strict:
-	@uv run flake8 $(SRC_DIR)/$(wildcard .py)
-	@uv run mypy $(SRC_DIR)/$(wildcard.py) --strict
-
-test:
-	@uv run python3 -m pytest
+	@uv run flake8 src/
+	@uv run mypy src/ --strict

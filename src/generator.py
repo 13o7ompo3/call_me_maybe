@@ -7,12 +7,55 @@ from src.prompts import build_routing_prompt
 
 
 class RoutingGenerator:
+    """Generate a function name from a user query using constrained decoding.
+
+    Args:
+        llm (Any): Language model wrapper used for tokenization and
+            logits.
+        vocab (Vocabulary): Vocabulary helper that maps token IDs to strings.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+
     def __init__(self, llm: Any, vocab: Vocabulary):
+        """Store the model and vocabulary used for routing.
+
+        Args:
+            llm (Any): Language model wrapper used for inference.
+            vocab (Vocabulary): Vocabulary helper that maps token IDs to
+                strings.
+
+        Returns:
+            None.
+
+        Raises:
+            None.
+        """
         self.llm = llm
         self.vocab = vocab
 
     def route(self, user_query: str, cache: RouterCache,
               functions: List[FunctionDefinition]) -> str:
+        """Route a natural-language query to the most likely function name.
+
+        Args:
+            user_query (str): Natural-language query from the user.
+            cache (RouterCache): Prefix cache that constrains valid next
+                tokens.
+            functions (List[FunctionDefinition]): Available function
+                definitions to choose from.
+
+        Returns:
+            str: Selected function name, or ``"fn_unknown"`` when no unique
+            match can be determined.
+
+        Raises:
+            None.
+        """
         injected_prompt = build_routing_prompt(user_query, functions)
         input_tensor = self.llm.encode(injected_prompt)
         current_ids: List[int] = input_tensor.tolist()[0]

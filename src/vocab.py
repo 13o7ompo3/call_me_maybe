@@ -5,7 +5,32 @@ from typing import Any
 
 
 class Vocabulary:
+    """Load tokenizer vocabulary data and expose token lookup tables.
+
+    Args:
+        llm_model (str | None): Optional Hugging Face model identifier.
+
+    Returns:
+        None.
+
+    Raises:
+        Exception: Propagates model-loading and tokenizer-download failures.
+        SystemExit: If the tokenizer vocabulary cannot be loaded.
+    """
+
     def __init__(self, llm_model: str | None = None) -> None:
+        """Initialize the model wrapper and load its tokenizer vocabulary.
+
+        Args:
+            llm_model (str | None): Optional Hugging Face model identifier.
+
+        Returns:
+            None.
+
+        Raises:
+            Exception: Propagates model-loading failures.
+            SystemExit: If the tokenizer vocabulary cannot be loaded.
+        """
         print("Booting the LLM Engine...")
 
         try:
@@ -27,6 +52,18 @@ class Vocabulary:
         self._load()
 
     def _load(self) -> None:
+        """Load tokenizer vocabulary data from the model repository.
+
+        Args:
+            None.
+
+        Returns:
+            None.
+
+        Raises:
+            SystemExit: If the tokenizer file is missing or malformed.
+            Exception: Propagates unexpected download or file errors.
+        """
         try:
             tokenizer_path = self.llm.get_path_to_tokenizer_file()
             with open(tokenizer_path, "r", encoding="utf-8") as f:

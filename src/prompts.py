@@ -4,9 +4,18 @@ from src.schemas import FunctionDefinition
 
 def build_routing_prompt(user_query: str, functions: List[FunctionDefinition]
                          ) -> str:
-    """
-    Builds a hyper-dense, token-optimized prompt.
-    Forces the LLM to act as a strict routing engine, abandoning chat behavior.
+    """Build the prompt used to route a query to a single function.
+
+    Args:
+        user_query (str): Natural-language query from the user.
+        functions (List[FunctionDefinition]): Candidate functions available for
+            routing.
+
+    Returns:
+        str: Prompt instructing the model to emit a function name after a pipe.
+
+    Raises:
+        None.
     """
     prompt = (
         "ROUTING ENGINE MODE ACTIVE.\n"

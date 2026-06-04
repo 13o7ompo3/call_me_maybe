@@ -2,8 +2,37 @@ from typing import List, Dict
 
 
 class RouterCache:
+    """Cache valid next-token IDs for allowed function-name prefixes.
+
+    Args:
+        vocab_map (Dict[int, str]): Mapping from token IDs to token
+            strings.
+        allowed_functions (List[str]): Function names that may be
+            generated.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+
     def __init__(self, vocab_map: Dict[int, str], allowed_functions: List[str]
                  ) -> None:
+        """Build the prefix cache for the allowed function names.
+
+        Args:
+            vocab_map (Dict[int, str]): Mapping from token IDs to token
+                strings.
+            allowed_functions (List[str]): Function names that may be
+                generated.
+
+        Returns:
+            None.
+
+        Raises:
+            None.
+        """
         print("Initializing High-Speed Router Cache...")
         self.vocab = vocab_map
         self.allowed_functions = allowed_functions
@@ -14,10 +43,17 @@ class RouterCache:
 
     def _build_prefix_cache(self, functions: List[str]
                             ) -> Dict[str, List[int]]:
-        """
-        Maps every possible partial string of a function name
-        to its valid next tokens.
-        Example: cache['fn_a'] = [ID for 'dd', ID for 'dd_num', ID for 'd']
+        """Build a prefix-to-token-ID lookup table for function names.
+
+        Args:
+            functions (List[str]): Function names to index in the cache.
+
+        Returns:
+            Dict[str, List[int]]: Mapping from emitted prefix text to valid
+            next-token IDs.
+
+        Raises:
+            None.
         """
         clean_vocab: Dict[str, List[int]] = {}
         for tid, tok_str in self.vocab.items():
@@ -50,9 +86,16 @@ class RouterCache:
         return cache
 
     def get_valid_token_ids(self, emitted_text: str) -> List[int]:
-        """
-        The O(1) Hot Loop.
-        Instantly returns the allowed tokens
-        for whatever text has been generated so far.
+        """Return the allowed token IDs for the current emitted prefix.
+
+        Args:
+            emitted_text (str): Text already generated after the pipe symbol.
+
+        Returns:
+            List[int]: Valid token IDs for continuing the current prefix, or an
+            empty list when the prefix is unknown.
+
+        Raises:
+            None.
         """
         return self.valid_prefixes.get(emitted_text, [])

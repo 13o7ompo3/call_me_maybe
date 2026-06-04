@@ -7,12 +7,18 @@ from .hints import ARGUMENT_HINTS
 
 
 class FunctionCallingPipeline:
-    """End-to-end pipeline for LLM-based function calling.
+    """Run routing and argument extraction over a batch of test prompts.
 
-    Attributes:
-        functions_definition_path: Path to the function definitions JSON.
-        input_path: Path to the prompts JSON.
-        output_path: Path for the output JSON.
+    Args:
+        functions_definition_path (str): Path to the function definitions JSON.
+        input_path (str): Path to the prompts JSON file.
+        output_path (str): Path where the results JSON will be written.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
     """
 
     def __init__(
@@ -21,18 +27,36 @@ class FunctionCallingPipeline:
         input_path: str,
         output_path: str,
     ) -> None:
-        """Initialise the pipeline with file paths.
+        """Initialize the pipeline with input and output file paths.
 
         Args:
-            functions_definition_path: Path to functions_definition.json.
-            input_path: Path to function_calling_tests.json.
-            output_path: Destination for function_calls.json.
+            functions_definition_path (str): Path to functions_definition.json.
+            input_path (str): Path to function_calling_tests.json.
+            output_path (str): Destination for the generated results file.
+
+        Returns:
+            None.
+
+        Raises:
+            None.
         """
         self.functions_definition_path = functions_definition_path
         self.input_path = input_path
         self.output_path = output_path
 
     def run(self) -> None:
+        """Execute the full function-calling pipeline and persist results.
+
+        Args:
+            None.
+
+        Returns:
+            None.
+
+        Raises:
+            SystemExit: Propagated from the loading or saving helpers when they
+            fail.
+        """
         functions = load_functions(self.functions_definition_path)
         prompts = load_prompts(self.input_path)
         functions_map = {f.name: f for f in functions}
