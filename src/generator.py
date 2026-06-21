@@ -72,18 +72,15 @@ class RoutingGenerator:
 
             if not allowed_ids:
                 break
-            mask = np.full(logits.shape, -np.inf)
-            mask[allowed_ids] = logits[allowed_ids]
-            exp_logits = np.exp(mask - np.max(mask))
-            probabilities = exp_logits / np.sum(exp_logits)
+            global_max_logit = np.max(logits)
 
-            allowed_probabilities = probabilities[allowed_ids]
+            allowed_logits = logits[allowed_ids]
 
-            best_allowed_idx = np.argmax(allowed_probabilities)
+            best_allowed_idx = np.argmax(allowed_logits)
             next_token_id = allowed_ids[best_allowed_idx]
-            max_prob = allowed_probabilities[best_allowed_idx]
+            best_allowed_logit = allowed_logits[best_allowed_idx]
 
-            if max_prob < 0.12:
+            if (global_max_logit - best_allowed_logit) > 6.0:
                 break
 
             next_token_str = self.vocab.id_to_token[next_token_id]
