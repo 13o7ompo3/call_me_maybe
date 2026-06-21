@@ -4,6 +4,7 @@ from src.vocab import Vocabulary
 from src.cache import RouterCache
 from src.schemas import FunctionDefinition
 from src.prompts import build_routing_prompt
+import torch.nn.functional as F
 
 
 class RoutingGenerator:
@@ -75,12 +76,12 @@ class RoutingGenerator:
             if not allowed_ids:
                 break
 
-            mask = np.full(len(logits), -np.inf)
+            mask = np.full(len(allowed_ids), 0)
             for valid_id in allowed_ids:
                 mask[valid_id] = logits[valid_id]
-
-            next_token_id = int(np.argmax(mask))
-            if mask[next_token_id] < 0.5:  # Threshold to ensure confidence in the choice
+            probabilities = F.softmax(torch.tensor(mask), dim=-1).numpy()
+            max_prob, next_token_id = torch.max(probabilities, dim=-1)
+            if max_prob < 0.5:  # Threshold to ensure confidence in the choice
                 break
 
             next_token_str = self.vocab.id_to_token[next_token_id]
