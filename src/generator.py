@@ -79,8 +79,9 @@ class RoutingGenerator:
                 mask[valid_id] = logits[valid_id]
             exp_logits = np.exp(mask - np.max(mask))
             probabilities = exp_logits / np.sum(exp_logits)
-            next_token_id = int(np.argmax(mask))
-            max_prob = probabilities[next_token_id]
+            allowed_probabilities = probabilities[allowed_ids]
+            next_token_id = int(np.argmax(allowed_probabilities))
+            max_prob = allowed_probabilities[next_token_id]
             if max_prob < 0.5:  # Threshold to ensure confidence in the choice
                 break
 
