@@ -61,7 +61,6 @@ class RoutingGenerator:
         current_ids: List[int] = input_tensor.tolist()[0]
 
         probable_functions = {fn.name: fn.name for fn in functions}
-
         generated_text = ""
 
         print(f"\n- Prompt: '{user_query}'")
@@ -69,7 +68,6 @@ class RoutingGenerator:
 
         while True:
             logits = self.llm.get_logits_from_input_ids(current_ids)
-
             allowed_ids = cache.get_valid_token_ids(generated_text)
 
             if not allowed_ids:
@@ -77,11 +75,14 @@ class RoutingGenerator:
 
             exp_logits = np.exp(logits - np.max(logits))
             probabilities = exp_logits / np.sum(exp_logits)
+
             allowed_probabilities = probabilities[allowed_ids]
-            next_token_idx = np.argmax(allowed_probabilities)
-            next_token_id = allowed_ids[next_token_idx]
-            max_prob = allowed_probabilities[next_token_id]
-            if max_prob < 0.5:  # Threshold to ensure confidence in the choice
+
+            best_allowed_idx = np.argmax(allowed_probabilities)
+            next_token_id = allowed_ids[best_allowed_idx]
+            max_prob = allowed_probabilities[best_allowed_idx]
+
+            if max_prob < 0.12:
                 break
 
             next_token_str = self.vocab.id_to_token[next_token_id]
@@ -101,4 +102,5 @@ class RoutingGenerator:
                 return list(probable_functions.keys())[0]
             if len(probable_functions) == 0:
                 break
+
         return "fn_unsupported_action"
