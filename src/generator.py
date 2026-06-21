@@ -72,8 +72,9 @@ class RoutingGenerator:
 
             if not allowed_ids:
                 break
-
-            exp_logits = np.exp(logits - np.max(logits))
+            mask = np.full(logits.shape, -np.inf)
+            mask[allowed_ids] = logits[allowed_ids]
+            exp_logits = np.exp(mask - np.max(mask))
             probabilities = exp_logits / np.sum(exp_logits)
 
             allowed_probabilities = probabilities[allowed_ids]
