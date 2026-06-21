@@ -2,7 +2,7 @@ import json
 import sys
 from pathlib import Path
 from pydantic import ValidationError
-from src.schemas import FunctionDefinition, TestCase
+from src.schemas import FunctionDefinition, TestCase, ReturnDef
 from typing import Callable, Any, Dict
 
 
@@ -68,7 +68,13 @@ def load_functions(filepath: str) -> list[FunctionDefinition]:
     """
     with open(filepath, 'r') as f:
         raw_data = json.load(f)
-    return [FunctionDefinition(**item) for item in raw_data]
+    return [
+        FunctionDefinition(
+            name="fn_unknown",
+            description="Fallback function when no hard match is found.",
+            parameters={},
+            returns=ReturnDef(type="string"))] + [
+                FunctionDefinition(**item) for item in raw_data]
 
 
 @error_and_exit
