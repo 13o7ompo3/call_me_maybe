@@ -70,8 +70,11 @@ def load_functions(filepath: str) -> list[FunctionDefinition]:
         raw_data = json.load(f)
     return [
         FunctionDefinition(
-            name="fn_unknown",
-            description="Fallback function when no hard match is found.",
+            name="fn_unsupported_action",
+            description="Triggers ONLY when the user query "
+            "does not fit any other function. Use this for general questions, "
+            "conversational chitchat, weather, philosophy, math calculations, "
+            "or requests unrelated to string manipulation.",
             parameters={},
             returns=ReturnDef(type="string"))] + [
                 FunctionDefinition(**item) for item in raw_data]

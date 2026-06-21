@@ -80,7 +80,7 @@ class FunctionCallingPipeline:
 
             # Phase 2: Argument extraction
             extracted_args = {}
-            if chosen_func_name != "fn_unknown":
+            if chosen_func_name != "fn_unsupported_action":
                 extracted_args = extractor.extract(test_case.prompt,
                                                    chosen_func_name,
                                                    functions_map[

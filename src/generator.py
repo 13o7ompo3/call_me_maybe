@@ -50,8 +50,8 @@ class RoutingGenerator:
                 definitions to choose from.
 
         Returns:
-            str: Selected function name, or ``"fn_unknown"`` when no unique
-            match can be determined.
+            str: Selected function name, or ``"fn_unsupported_action"``
+            when no uniquematch can be determined.
 
         Raises:
             None.
@@ -98,4 +98,4 @@ class RoutingGenerator:
                 return list(probable_functions.keys())[0]
             if len(probable_functions) == 0:
                 break
-        return "fn_unknown"
+        return "fn_unsupported_action"

@@ -29,7 +29,9 @@ def build_routing_prompt(user_query: str, functions: List[FunctionDefinition]
         prompt += f"- {f.name}: {f.description}\n, returns {f.returns}\n"
 
     prompt += "\nEXAMPLES:\n"
-    prompt += "Query: 'Say hello to Alice'\nFunction: fn_function\n"
+    prompt += "Query: 'Hello there, who are you?'\nFunction: fn_unsupported_action\n\n"
+    prompt += "Query: 'What is the weather like today in Paris?'\nFunction: fn_unsupported_action\n\n"
+    prompt += "Query: 'Say hello to Alice'\nFunction: fn_function\n\n"
 
     prompt += f"\nUSER QUERY: {user_query}\n"
 
