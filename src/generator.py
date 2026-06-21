@@ -74,13 +74,12 @@ class RoutingGenerator:
 
             if not allowed_ids:
                 break
-            mask = np.full(len(allowed_ids), 0)
-            for valid_id in allowed_ids:
-                mask[valid_id] = logits[valid_id]
-            exp_logits = np.exp(mask - np.max(mask))
+
+            exp_logits = np.exp(logits - np.max(logits))
             probabilities = exp_logits / np.sum(exp_logits)
             allowed_probabilities = probabilities[allowed_ids]
-            next_token_id = int(np.argmax(allowed_probabilities))
+            next_token_idx = np.argmax(allowed_probabilities)
+            next_token_id = allowed_ids[next_token_idx]
             max_prob = allowed_probabilities[next_token_id]
             if max_prob < 0.5:  # Threshold to ensure confidence in the choice
                 break
