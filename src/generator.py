@@ -50,7 +50,7 @@ class RoutingGenerator:
                 definitions to choose from.
 
         Returns:
-            str: Selected function name, or ``"fn_unsupported_action"``
+            str: Selected function name, or ``fn_unsupported_action``
             when no uniquematch can be determined.
 
         Raises:
@@ -80,6 +80,8 @@ class RoutingGenerator:
                 mask[valid_id] = logits[valid_id]
 
             next_token_id = int(np.argmax(mask))
+            if mask[next_token_id] < 0.5:  # Threshold to ensure confidence in the choice
+                break
 
             next_token_str = self.vocab.id_to_token[next_token_id]
             clean_str = next_token_str.replace(

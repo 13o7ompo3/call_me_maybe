@@ -20,7 +20,7 @@ def build_routing_prompt(user_query: str, functions: List[FunctionDefinition]
     prompt = (
         "ROUTING ENGINE MODE ACTIVE.\n"
         "Read the user query to understand the intent"
-        " then output the function name.\n"
+        " then output the function name or fn_unsupported_action.\n"
         "Do not explain. Use the exact format: function_name\n\n"
         "AVAILABLE FUNCTIONS:\n"
     )
