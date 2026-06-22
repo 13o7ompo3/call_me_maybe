@@ -81,7 +81,7 @@ class RoutingGenerator:
             next_token_id = allowed_ids[next_token_idx]
             next_token_prob = probs[next_token_idx]
 
-            if next_token_prob < 0.1:
+            if next_token_prob < 0.9:
                 break
 
             next_token_str = self.vocab.id_to_token[next_token_id]
