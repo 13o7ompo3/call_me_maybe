@@ -1,4 +1,5 @@
-from .loader import load_functions, load_prompts, save_results
+from .loader import (load_functions, load_prompts,
+                     save_results, porobable_functions)
 from .vocab import Vocabulary
 from .cache import RouterCache
 from .generator import RoutingGenerator
@@ -59,7 +60,7 @@ class FunctionCallingPipeline:
         """
         functions = load_functions(self.functions_definition_path)
         prompts = load_prompts(self.input_path)
-        functions_map = {f.name: f for f in functions}
+        functions_map = porobable_functions(functions)
 
         vocab = Vocabulary()
         cache = RouterCache(vocab.id_to_token, list(functions_map.keys()))
