@@ -67,20 +67,21 @@ class RoutingGenerator:
         print("\nFunction: ", end="", flush=True)
 
         while True:
-            logits = self.llm.get_logits_from_input_ids(current_ids)
+            raw_logits = self.llm.get_logits_from_input_ids(current_ids)
+            logits = np.array(raw_logits) 
             allowed_ids = cache.get_valid_token_ids(generated_text)
 
             if not allowed_ids:
                 break
-            global_max_logit = np.max(logits)
 
             allowed_logits = logits[allowed_ids]
+            exp_logits = np.exp(allowed_logits - np.max(allowed_logits))
+            probs = exp_logits / np.sum(exp_logits)
+            next_token_idx = np.argmax(probs)
+            next_token_id = allowed_ids[next_token_idx]
+            next_token_prob = probs[next_token_idx]
 
-            best_allowed_idx = np.argmax(allowed_logits)
-            next_token_id = allowed_ids[best_allowed_idx]
-            best_allowed_logit = allowed_logits[best_allowed_idx]
-
-            if (global_max_logit - best_allowed_logit) > 6.0:
+            if next_token_prob < 0.1:
                 break
 
             next_token_str = self.vocab.id_to_token[next_token_id]
