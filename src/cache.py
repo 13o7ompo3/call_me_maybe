@@ -74,11 +74,13 @@ class RouterCache:
                 if already_emitted not in cache:
                     cache[already_emitted] = []
 
+                potential_token_id = []
                 for j in range(1, len(remaining) + 1):
                     potential_token = remaining[:j]
                     if potential_token in clean_vocab:
-                        cache[already_emitted].extend(
-                            clean_vocab[potential_token])
+                        potential_token_id = clean_vocab[potential_token]
+                if potential_token_id:
+                    cache[already_emitted].extend(potential_token_id)
 
         for k in cache:
             cache[k] = list(set(cache[k]))
