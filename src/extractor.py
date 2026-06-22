@@ -1,5 +1,6 @@
 import numpy as np
 import copy
+from os.path import commonprefix
 from typing import Dict, Any
 from src.vocab import Vocabulary
 from src.schemas import FunctionDefinition
@@ -123,15 +124,14 @@ class ExtractionGenerator:
         generated_text = f"<{keys[0]}>"
         print(f"[EXTRACTION]\n\n{generated_text}", end="", flush=True)
 
-        # Standard greedy decoding loop
-        for step in range(100):
+        while True:  # Not safe anymore
             logits = self.llm.get_logits_from_input_ids(current_ids)
             next_id = int(np.argmax(logits))
             clean_str = self.vocab.id_to_token[next_id].replace(
                 "Ġ", " ").replace("\u0120", " ").replace("Ċ", "\n")
 
             current_ids.append(next_id)
-            generated_text += clean_str.lstrip()
+            generated_text += clean_str
             argument += clean_str
             print(clean_str, end="", flush=True)
 
@@ -161,6 +161,16 @@ class ExtractionGenerator:
                         level[p_name] = p_remaining.lstrip()
                 if len(level) == 0:
                     probable_argument.remove(level)
+                prefix = commonprefix(list(level.values()))
+                if prefix:
+                    tokens = self.llm.encode(prefix).tolist()[0]
+                    current_ids.extend(tokens)
+                    generated_text += prefix
+                    print(prefix, end="", flush=True)
+                    for p_name, p_remaining in level.items():
+                        level[p_name] = p_remaining[len(prefix):]
+                    probable_argument = [level]
+                    break
 
             target_end_tag = f"</{keys[current_index]}>"
 
