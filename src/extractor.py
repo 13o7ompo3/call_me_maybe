@@ -30,6 +30,7 @@ class ExtractionGenerator(BaseModel):
     llm: Small_LLM_Model
     vocab: Vocabulary
     hints: Dict[str, Dict[str, str]]
+    probable_argument: list[Dict[str, str]] = []
 
     def _build_prompt(self, user_query: str, func_name: str,
                       func_def: FunctionDefinition) -> str:

@@ -1,7 +1,7 @@
 import json
 import sys
 from llm_sdk import Small_LLM_Model
-from pydantic import BaseModel, model_validator, Field, ConfigDict
+from pydantic import BaseModel, model_validator, ConfigDict
 
 
 class Vocabulary(BaseModel):
@@ -19,8 +19,8 @@ class Vocabulary(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
     llm: Small_LLM_Model | None = None
-    token_to_id: dict[str, int] = Field(default={})
-    id_to_token: dict[int, str] = Field(default={})
+    token_to_id: dict[str, int] = {}
+    id_to_token: dict[int, str] = {}
 
     @model_validator(mode="after")
     def init(self) -> 'Vocabulary':
