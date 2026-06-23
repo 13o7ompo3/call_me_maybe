@@ -6,7 +6,7 @@ from src.schemas import FunctionDefinition, TestCase, ReturnDef
 from typing import Callable, Any, Dict
 
 
-def error_and_exit(function: Callable[[str], Any]) -> Callable[[str], Any]:
+def error_and_exit(function: Callable[[str], list]) -> Callable[[str], list]:
     """Wrap a loader function so file and schema errors exit cleanly.
 
     Args:

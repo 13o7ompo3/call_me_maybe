@@ -1,16 +1,18 @@
 import numpy as np
-from typing import List, Any
+from typing import List
+from pydantic import BaseModel
+from llm_sdk.llm_sdk import Small_LLM_Model
 from src.vocab import Vocabulary
 from src.cache import RouterCache
 from src.schemas import FunctionDefinition
 from src.prompts import build_routing_prompt
 
 
-class RoutingGenerator:
+class RoutingGenerator(BaseModel):
     """Generate a function name from a user query using constrained decoding.
 
     Args:
-        llm (Any): Language model wrapper used for tokenization and
+        llm (Small_LLM_Model): Language model wrapper used for tokenization and
             logits.
         vocab (Vocabulary): Vocabulary helper that maps token IDs to strings.
 
@@ -21,22 +23,8 @@ class RoutingGenerator:
         None.
     """
 
-    def __init__(self, llm: Any, vocab: Vocabulary):
-        """Store the model and vocabulary used for routing.
-
-        Args:
-            llm (Any): Language model wrapper used for inference.
-            vocab (Vocabulary): Vocabulary helper that maps token IDs to
-                strings.
-
-        Returns:
-            None.
-
-        Raises:
-            None.
-        """
-        self.llm = llm
-        self.vocab = vocab
+    llm: Small_LLM_Model
+    vocab: Vocabulary
 
     def route(self, user_query: str, cache: RouterCache,
               functions: List[FunctionDefinition]) -> str:

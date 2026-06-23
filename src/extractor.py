@@ -1,17 +1,19 @@
 import numpy as np
 import copy
+from llm_sdk.llm_sdk import Small_LLM_Model
 from os.path import commonprefix
 from typing import Dict, Any
 from src.vocab import Vocabulary
 from src.schemas import FunctionDefinition
+from pydantic import BaseModel
 import re
 
 
-class ExtractionGenerator:
+class ExtractionGenerator(BaseModel):
     """Extract function arguments from a user query with constrained decoding.
 
     Args:
-        llm (Any): Language model wrapper used for tokenization and
+        llm (Small_LLM_Model): Language model wrapper used for tokenization and
             logits.
         vocab (Vocabulary): Vocabulary helper that maps token IDs to strings.
         hints (Dict[str, Dict[str, str]]): Optional per-function extraction
@@ -24,25 +26,9 @@ class ExtractionGenerator:
         None.
     """
 
-    def __init__(self, llm: Any, vocab: Vocabulary,
-                 hints: Dict[str, Dict[str, str]]):
-        """Store the model, vocabulary, and extraction hints.
-
-        Args:
-            llm (Any): Language model wrapper used for inference.
-            vocab (Vocabulary): Vocabulary helper that maps token IDs to
-                strings.
-            hints (Dict[str, Dict[str, str]]): Optional extraction hints.
-
-        Returns:
-            None.
-
-        Raises:
-            None.
-        """
-        self.llm = llm
-        self.vocab = vocab
-        self.hints = hints
+    llm: Small_LLM_Model
+    vocab: Vocabulary
+    hints: Dict[str, Dict[str, str]]
 
     def _build_prompt(self, user_query: str, func_name: str,
                       func_def: FunctionDefinition) -> str:
@@ -128,7 +114,7 @@ class ExtractionGenerator:
             logits = self.llm.get_logits_from_input_ids(current_ids)
             next_id = int(np.argmax(logits))
             clean_str = self.vocab.id_to_token[next_id].replace(
-                "Ġ", " ").replace("\u0120", " ").replace("Ċ", "\n")
+                "Ġ", " ").replace("Ċ", "\n")
 
             current_ids.append(next_id)
             generated_text += clean_str

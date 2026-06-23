@@ -5,9 +5,10 @@ from .cache import RouterCache
 from .generator import RoutingGenerator
 from .extractor import ExtractionGenerator
 from .hints import ARGUMENT_HINTS
+from pydantic import BaseModel
 
 
-class FunctionCallingPipeline:
+class FunctionCallingPipeline(BaseModel):
     """Run routing and argument extraction over a batch of test prompts.
 
     Args:
@@ -22,28 +23,9 @@ class FunctionCallingPipeline:
         None.
     """
 
-    def __init__(
-        self,
-        functions_definition_path: str,
-        input_path: str,
-        output_path: str,
-    ) -> None:
-        """Initialize the pipeline with input and output file paths.
-
-        Args:
-            functions_definition_path (str): Path to functions_definition.json.
-            input_path (str): Path to function_calling_tests.json.
-            output_path (str): Destination for the generated results file.
-
-        Returns:
-            None.
-
-        Raises:
-            None.
-        """
-        self.functions_definition_path = functions_definition_path
-        self.input_path = input_path
-        self.output_path = output_path
+    functions_definition_path: str
+    input_path: str
+    output_path: str
 
     def run(self) -> None:
         """Execute the full function-calling pipeline and persist results.
@@ -63,10 +45,12 @@ class FunctionCallingPipeline:
         functions_map = porobable_functions(functions)
 
         vocab = Vocabulary()
-        cache = RouterCache(vocab.id_to_token, list(functions_map.keys()))
+        cache = RouterCache(vocab=vocab.id_to_token,
+                            allowed_functions=list(functions_map.keys()))
 
-        router = RoutingGenerator(vocab.llm, vocab)
-        extractor = ExtractionGenerator(vocab.llm, vocab, ARGUMENT_HINTS)
+        router = RoutingGenerator(llm=vocab.llm, vocab=vocab)
+        extractor = ExtractionGenerator(llm=vocab.llm, vocab=vocab,
+                                        hints=ARGUMENT_HINTS)
 
         # 3. The Batch Pipeline
         results = []
