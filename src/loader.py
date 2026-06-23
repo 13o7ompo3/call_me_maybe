@@ -141,11 +141,15 @@ def porobable_functions(functions: list[FunctionDefinition]
             name="fn_unsupported_action",
             description="Triggers ONLY when the user query "
             "does not fit any other function. Use this for general questions, "
-            "conversational chitchat, weather, philosophy, math calculations, "
-            "or requests unrelated to string manipulation.",
+            "conversational chitchat, weather, philosophy, math calculations.",
             parameters={},
             returns=ReturnDef(type="string"))
-    functions_map = {f.name: f for f in functions}
+    functions_map = {}
+    for func in functions:
+        if func.name in functions_map:
+            print(f"Error: Duplicate function name '{func.name}' found.")
+            sys.exit(1)
+        functions_map[func.name] = func
     if "fn_unsupported_action" in functions_map:
         print("Warning: 'fn_unsupported_action' is reserved for "
               "unsupported queries. It will be overridden.")
