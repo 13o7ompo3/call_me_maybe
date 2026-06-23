@@ -1,5 +1,5 @@
 from typing import List, Dict
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, model_validator, Field
 
 
 class RouterCache(BaseModel):
@@ -20,6 +20,7 @@ class RouterCache(BaseModel):
 
     vocab: Dict[int, str]
     allowed_functions: List[str]
+    valid_prefixes: Dict[str, List[int]] = Field(default={})
 
     @model_validator(mode="after")
     def init(self) -> 'RouterCache':
