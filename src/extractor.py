@@ -1,6 +1,6 @@
 import numpy as np
 import copy
-from llm_sdk import Small_LLM_Model
+from llm_sdk import Small_LLM_Model  # type: ignore[attr-defined]
 from os.path import commonprefix
 from typing import Dict, Any
 from src.vocab import Vocabulary

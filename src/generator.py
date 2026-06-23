@@ -1,7 +1,7 @@
 import numpy as np
 from typing import List
 from pydantic import BaseModel, ConfigDict
-from llm_sdk import Small_LLM_Model
+from llm_sdk import Small_LLM_Model  # type: ignore[attr-defined]
 from src.vocab import Vocabulary
 from src.cache import RouterCache
 from src.schemas import FunctionDefinition

@@ -1,6 +1,6 @@
 import json
 import sys
-from llm_sdk import Small_LLM_Model
+from llm_sdk import Small_LLM_Model  # type: ignore[attr-defined]
 from pydantic import BaseModel, model_validator, ConfigDict
 
 
@@ -45,6 +45,9 @@ class Vocabulary(BaseModel):
             Exception: Propagates unexpected download or file errors.
         """
         try:
+            if self.llm is None:
+                print("Error: LLM model is not initialized.")
+                sys.exit(1)
             vocab_path = self.llm.get_path_to_vocab_file()
             with open(vocab_path, "r", encoding="utf-8") as f:
                 raw_vocab = json.load(f)
