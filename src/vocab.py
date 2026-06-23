@@ -1,7 +1,7 @@
 import json
 import sys
 from llm_sdk import Small_LLM_Model
-from pydantic import BaseModel, model_validator, Field
+from pydantic import BaseModel, model_validator, Field, ConfigDict
 
 
 class Vocabulary(BaseModel):
@@ -17,6 +17,7 @@ class Vocabulary(BaseModel):
         SystemExit: If the tokenizer vocabulary cannot be loaded.
     """
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     llm: Small_LLM_Model | None = None
     token_to_id: dict[str, int] = Field(default={})
     id_to_token: dict[int, str] = Field(default={})
