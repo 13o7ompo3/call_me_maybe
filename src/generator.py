@@ -1,7 +1,7 @@
 import numpy as np
 from typing import List
-from pydantic import BaseModel
-from llm_sdk.llm_sdk import Small_LLM_Model
+from pydantic import BaseModel, ConfigDict
+from llm_sdk import Small_LLM_Model
 from src.vocab import Vocabulary
 from src.cache import RouterCache
 from src.schemas import FunctionDefinition
@@ -23,6 +23,7 @@ class RoutingGenerator(BaseModel):
         None.
     """
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     llm: Small_LLM_Model
     vocab: Vocabulary
 

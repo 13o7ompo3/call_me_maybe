@@ -5,7 +5,7 @@ from os.path import commonprefix
 from typing import Dict, Any
 from src.vocab import Vocabulary
 from src.schemas import FunctionDefinition
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 import re
 
 
@@ -26,6 +26,7 @@ class ExtractionGenerator(BaseModel):
         None.
     """
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     llm: Small_LLM_Model
     vocab: Vocabulary
     hints: Dict[str, Dict[str, str]]
