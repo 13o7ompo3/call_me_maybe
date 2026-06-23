@@ -68,7 +68,7 @@ class RoutingGenerator:
 
         while True:
             raw_logits = self.llm.get_logits_from_input_ids(current_ids)
-            logits = np.array(raw_logits) 
+            logits = np.array(raw_logits)
             allowed_ids = cache.get_valid_token_ids(generated_text)
 
             if not allowed_ids:
@@ -81,12 +81,12 @@ class RoutingGenerator:
             next_token_id = allowed_ids[next_token_idx]
             next_token_prob = probs[next_token_idx]
 
-            if next_token_prob < 0.9:
+            if next_token_prob < 0.6:
                 break
 
             next_token_str = self.vocab.id_to_token[next_token_id]
             clean_str = next_token_str.replace(
-                "Ġ", " ").replace("\u0120", " ").replace("Ċ", "\n")
+                "Ġ", " ").replace("Ċ", "\n")
 
             current_ids.append(next_token_id)
             generated_text += clean_str
