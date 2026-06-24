@@ -13,6 +13,9 @@ install:
 run:
 	@HF_HOME="$(HOME)/$(CACHE_DIR)" uv run python3 -m $(SRC_DIR)
 
+test:
+	@HF_HOME="$(HOME)/$(CACHE_DIR)" uv run python3 -m src --input data/input/invalid_test_case.json
+
 debug:
 	@HF_HOME="$(HOME)/$(CACHE_DIR)" uv run python3 -m pdb -m $(SRC_DIR)
 
