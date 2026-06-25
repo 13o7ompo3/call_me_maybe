@@ -6,6 +6,7 @@ from src.vocab import Vocabulary
 from src.cache import RouterCache
 from src.schemas import FunctionDefinition
 from src.prompts import build_routing_prompt
+from os.path import commonprefix
 
 
 class RoutingGenerator(BaseModel):
@@ -90,5 +91,12 @@ class RoutingGenerator(BaseModel):
                 return list(probable_functions.keys())[0]
             if len(probable_functions) == 0:
                 break
+            prefix = commonprefix(list(probable_functions.values()))
+            if prefix:
+                generated_text += prefix
+                current_ids += self.llm.encode(prefix).tolist()[0]
+                print(prefix, end="", flush=True)
+                for fn_name, remain in probable_functions.copy().items():
+                    probable_functions[fn_name] = remain[len(prefix):]
 
         return "fn_unsupported_action"
