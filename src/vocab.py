@@ -68,8 +68,7 @@ class Vocabulary(BaseModel):
             merge_path = self.llm.get_path_to_merges_file()
             with open(merge_path, "r", encoding="utf-8") as f:
                 for i, line in enumerate(f):
-                    line = line.strip().split("#")[0]
-                    if not line:
+                    if i == 0:
                         continue
                     try:
                         token1, token2 = line.strip().split()

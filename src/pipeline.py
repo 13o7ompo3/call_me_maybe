@@ -4,6 +4,7 @@ from .vocab import Vocabulary
 from .cache import RouterCache
 from .generator import RoutingGenerator
 from .extractor import ExtractionGenerator
+from .tokeniser import Tokeniser
 from .hints import ARGUMENT_HINTS
 from pydantic import BaseModel
 
@@ -45,11 +46,14 @@ class FunctionCallingPipeline(BaseModel):
         functions_map = porobable_functions(functions)
 
         vocab = Vocabulary()
+        tokenizer = Tokeniser(vocab=vocab)
         cache = RouterCache(vocab=vocab.id_to_token,
                             allowed_functions=list(functions_map.keys()))
 
-        router = RoutingGenerator(llm=vocab.llm, vocab=vocab)
+        router = RoutingGenerator(llm=vocab.llm, vocab=vocab,
+                                  tokeniser=tokenizer,)
         extractor = ExtractionGenerator(llm=vocab.llm, vocab=vocab,
+                                        tokeniser=tokenizer,
                                         hints=ARGUMENT_HINTS)
 
         # 3. The Batch Pipeline
