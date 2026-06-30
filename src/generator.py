@@ -1,12 +1,12 @@
 import numpy as np
 from typing import List
 from pydantic import BaseModel, ConfigDict
+from src.tokeniser import Tokeniser
 from llm_sdk import Small_LLM_Model  # type: ignore[attr-defined]
 from src.vocab import Vocabulary
 from src.cache import RouterCache
 from src.schemas import FunctionDefinition
 from src.prompts import build_routing_prompt
-from os.path import commonprefix
 
 
 class RoutingGenerator(BaseModel):
@@ -16,6 +16,7 @@ class RoutingGenerator(BaseModel):
         llm (Small_LLM_Model): Language model wrapper used for tokenization and
             logits.
         vocab (Vocabulary): Vocabulary helper that maps token IDs to strings.
+        tokeniser (Tokeniser): Tokeniser for encoding and decoding tokens.
 
     Returns:
         None.
@@ -27,6 +28,7 @@ class RoutingGenerator(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     llm: Small_LLM_Model
     vocab: Vocabulary
+    tokeniser: Tokeniser
 
     def route(self, user_query: str, cache: RouterCache,
               functions: List[FunctionDefinition]) -> str:
@@ -47,8 +49,7 @@ class RoutingGenerator(BaseModel):
             None.
         """
         injected_prompt = build_routing_prompt(user_query, functions)
-        input_tensor = self.llm.encode(injected_prompt)
-        current_ids: List[int] = input_tensor.tolist()[0]
+        current_ids: List[int] = self.tokeniser.encode(injected_prompt)
 
         probable_functions = {fn.name: fn.name for fn in functions}
         generated_text = ""
@@ -57,8 +58,7 @@ class RoutingGenerator(BaseModel):
         print("\nFunction: ", end="", flush=True)
 
         while True:
-            raw_logits = self.llm.get_logits_from_input_ids(current_ids)
-            logits = np.array(raw_logits)
+            logits = np.array(self.llm.get_logits_from_input_ids(current_ids))
             allowed_ids = cache.get_valid_token_ids(generated_text)
 
             if not allowed_ids:
@@ -91,12 +91,5 @@ class RoutingGenerator(BaseModel):
                 return list(probable_functions.keys())[0]
             if len(probable_functions) == 0:
                 break
-            prefix = commonprefix(list(probable_functions.values()))
-            if prefix:
-                generated_text += prefix
-                current_ids += self.llm.encode(prefix).tolist()[0]
-                print(prefix, end="", flush=True)
-                for fn_name, remain in probable_functions.copy().items():
-                    probable_functions[fn_name] = remain[len(prefix):]
 
         return "fn_unsupported_action"

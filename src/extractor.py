@@ -5,6 +5,7 @@ from os.path import commonprefix
 from typing import Dict, Any
 from src.vocab import Vocabulary
 from src.schemas import FunctionDefinition
+from src.tokeniser import Tokeniser
 from pydantic import BaseModel, ConfigDict
 import re
 
@@ -29,6 +30,7 @@ class ExtractionGenerator(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     llm: Small_LLM_Model
     vocab: Vocabulary
+    tokeniser: Tokeniser
     hints: Dict[str, Dict[str, str]]
     probable_argument: list[Dict[str, str]] = []
 
@@ -99,8 +101,7 @@ class ExtractionGenerator(BaseModel):
             return {}
 
         prompt = self._build_prompt(user_query, func_name, func_def)
-        input_tensor = self.llm.encode(prompt)
-        current_ids = input_tensor.tolist()[0]
+        current_ids = self.tokeniser.encode(prompt)
 
         keys = list(func_def.parameters.keys())
         current_index = 0
@@ -138,7 +139,7 @@ class ExtractionGenerator(BaseModel):
 
                     prediction = f"{surviving_remainder}</{real_xml_tag}>\n"
 
-                    tokens = self.llm.encode(prediction).tolist()[0]
+                    tokens = self.tokeniser.encode(prediction)
                     current_ids.extend(tokens)
                     generated_text += prediction
                     print(prediction, end="", flush=True)
@@ -151,7 +152,7 @@ class ExtractionGenerator(BaseModel):
                     probable_argument.remove(level)
                 prefix = commonprefix(list(level.values()))
                 if prefix:
-                    tokens = self.llm.encode(prefix).tolist()[0]
+                    tokens = self.tokeniser.encode(prefix)
                     current_ids.extend(tokens)
                     generated_text += prefix
                     print(prefix, end="", flush=True)
@@ -174,7 +175,7 @@ class ExtractionGenerator(BaseModel):
                 next_tag = f"<{keys[current_index]}>"
                 generated_text += next_tag
 
-                new_tokens = self.llm.encode(next_tag).tolist()[0]
+                new_tokens = self.tokeniser.encode(next_tag)
                 current_ids.extend(new_tokens)
                 print(next_tag, end="", flush=True)
 
@@ -213,11 +214,15 @@ class ExtractionGenerator(BaseModel):
                         result[p_name] = f(val_str)
                     except ValueError:
                         result[p_name] = f(0)
+                elif p_data.type == "boolean":
+                    result[p_name] = val_str.lower() in ("true", "yes")
                 else:
                     result[p_name] = val_str
             else:
                 if p_data.type in ("number", "integer"):
                     result[p_name] = f(0)
+                elif p_data.type == "boolean":
+                    result[p_name] = False
                 else:
                     result[p_name] = ""
 
