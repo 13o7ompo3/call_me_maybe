@@ -18,6 +18,7 @@ class Tokeniser(BaseModel):
         """
         return "".join(self.vocab.id_to_token[token].replace('Ġ', ' ')
                        .replace("Ċ", "\n").replace("ĉ", "\t")
+                       .replace("č", "\r")
                        for token in tokens if token in self.vocab.id_to_token)
 
     def encode(self, text: str) -> List[int]:
@@ -31,7 +32,8 @@ class Tokeniser(BaseModel):
                         in the vocabulary.
             """
         tokens = []
-        text = text.replace(' ', 'Ġ').replace("\n", "Ċ").replace("\t", "ĉ")
+        text = (text.replace(' ', 'Ġ').replace("\n", "Ċ")
+                .replace("\t", "ĉ").replace("\r", "č"))
         for char in text:
             if char in self.vocab.token_to_id:
                 tokens.append(self.vocab.token_to_id[char])

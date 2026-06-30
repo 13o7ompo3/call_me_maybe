@@ -43,8 +43,8 @@ class RouterCache(BaseModel):
         """
         clean_vocab: Dict[str, List[int]] = {}
         for tid, tok_str in self.vocab.items():
-            clean = tok_str.replace("Ġ", " ").replace(
-                "Ċ", "\n").replace("ĉ", "\t")
+            clean = (tok_str.replace("Ġ", " ").replace("Ċ", "\n")
+                     .replace("ĉ", "\t").replace("\r", "č"))
             if not clean:
                 continue
             if clean not in clean_vocab:
