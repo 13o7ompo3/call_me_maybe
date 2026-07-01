@@ -33,7 +33,10 @@ def build_routing_prompt(user_query: str, functions: List[FunctionDefinition]
                "fn_unsupported_action\n\n")
     prompt += ("Query: 'What is the weather like today in Paris?'\nFunction: "
                "fn_unsupported_action\n\n")
-    prompt += "Query: 'Say hello to Alice'\nFunction: fn_greet\n\n"
+    prompt += ("Query: 'Replace all numbers in \"Hello 34 I'm 233 years old\" "
+               "with NUMBERS'\nFunction: "
+               "fn_substitute_string_with_regex\n\n")
+    prompt += ("Query: 'Say hello to Alice'\nFunction: fn_greet\n\n")
 
     prompt += f"\nUSER QUERY: {user_query}\n"
 

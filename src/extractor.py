@@ -68,6 +68,11 @@ class ExtractionGenerator(BaseModel):
         prompt += "\nEXAMPLES:\n"
         prompt += "Query: 'What is the square root of 81?'\n<a>81</a>\n"
         prompt += "Query: 'Greet Alice'\n<name>Alice</name>\n"
+        prompt += ("Query: 'Replace all numbers in "
+                   "\"Hello 34 I'm 233 years old\" with NUMBERS'\n"
+                   "<source_string>Hello 34 I'm 233 years old</source_string>"
+                   "\n<regex>\\d+</regex>\n"
+                   "<replacement>NUMBERS</replacement>\n")
 
         prompt += f"\nUSER QUERY: {user_query}\nOUTPUT FORMAT:\n"
         for p_name in func_def.parameters.keys():
@@ -208,6 +213,7 @@ class ExtractionGenerator(BaseModel):
             f = {"number": float, "integer": int}.get(p_data.type, str)
             if s_idx != -1 and e_idx != -1:
                 val_str = xml_string[s_idx + len(start_tag):e_idx].strip()
+                xml_string = xml_string[e_idx + len(end_tag):]
 
                 if p_data.type in ("number", "integer"):
                     try:
