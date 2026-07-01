@@ -1,18 +1,22 @@
 import numpy as np
-from typing import List, Any
+from typing import List
+from pydantic import BaseModel, ConfigDict
+from src.tokeniser import Tokeniser
+from llm_sdk import Small_LLM_Model  # type: ignore[attr-defined]
 from src.vocab import Vocabulary
 from src.cache import RouterCache
 from src.schemas import FunctionDefinition
 from src.prompts import build_routing_prompt
 
 
-class RoutingGenerator:
+class RoutingGenerator(BaseModel):
     """Generate a function name from a user query using constrained decoding.
 
     Args:
-        llm (Any): Language model wrapper used for tokenization and
+        llm (Small_LLM_Model): Language model wrapper used for tokenization and
             logits.
         vocab (Vocabulary): Vocabulary helper that maps token IDs to strings.
+        tokeniser (Tokeniser): Tokeniser for encoding and decoding tokens.
 
     Returns:
         None.
@@ -21,22 +25,10 @@ class RoutingGenerator:
         None.
     """
 
-    def __init__(self, llm: Any, vocab: Vocabulary):
-        """Store the model and vocabulary used for routing.
-
-        Args:
-            llm (Any): Language model wrapper used for inference.
-            vocab (Vocabulary): Vocabulary helper that maps token IDs to
-                strings.
-
-        Returns:
-            None.
-
-        Raises:
-            None.
-        """
-        self.llm = llm
-        self.vocab = vocab
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    llm: Small_LLM_Model
+    vocab: Vocabulary
+    tokeniser: Tokeniser
 
     def route(self, user_query: str, cache: RouterCache,
               functions: List[FunctionDefinition]) -> str:
@@ -50,57 +42,54 @@ class RoutingGenerator:
                 definitions to choose from.
 
         Returns:
-            str: Selected function name, or ``"fn_unknown"`` when no unique
-            match can be determined.
+            str: Selected function name, or ``fn_unsupported_action``
+            when no uniquematch can be determined.
 
         Raises:
             None.
         """
         injected_prompt = build_routing_prompt(user_query, functions)
-        input_tensor = self.llm.encode(injected_prompt)
-        current_ids: List[int] = input_tensor.tolist()[0]
+        current_ids: List[int] = self.tokeniser.encode(injected_prompt)
 
         probable_functions = {fn.name: fn.name for fn in functions}
-
         generated_text = ""
 
         print(f"\n- Prompt: '{user_query}'")
-        print("\nANALYSIS:", end="", flush=True)
+        print("\nFunction: ", end="", flush=True)
 
-        for step in range(40):
-            logits = self.llm.get_logits_from_input_ids(current_ids)
+        while True:
+            logits = np.array(self.llm.get_logits_from_input_ids(current_ids))
+            allowed_ids = cache.get_valid_token_ids(generated_text)
 
-            if "|" not in generated_text:
-                next_token_id = int(np.argmax(logits))
-            else:
-                after_pipe = generated_text.split("|")[1].lstrip()
-                allowed_ids = cache.get_valid_token_ids(after_pipe)
+            if not allowed_ids:
+                break
 
-                if not allowed_ids:
-                    break
+            allowed_logits = logits[allowed_ids]
+            exp_logits = np.exp(allowed_logits - np.max(allowed_logits))
+            probs = exp_logits / np.sum(exp_logits)
+            next_token_idx = np.argmax(probs)
+            next_token_id = allowed_ids[next_token_idx]
+            next_token_prob = probs[next_token_idx]
 
-                mask = np.full(len(logits), -np.inf)
-                for valid_id in allowed_ids:
-                    mask[valid_id] = logits[valid_id]
-
-                next_token_id = int(np.argmax(mask))
+            if next_token_prob < 0.6:
+                break
 
             next_token_str = self.vocab.id_to_token[next_token_id]
             clean_str = next_token_str.replace(
-                "Ġ", " ").replace("\u0120", " ").replace("Ċ", "\n")
+                "Ġ", " ").replace("Ċ", "\n")
 
             current_ids.append(next_token_id)
             generated_text += clean_str
             print(clean_str, end="", flush=True)
 
-            if "|" in generated_text and not clean_str.strip() in ["", "|"]:
-                for fn_name, remain in probable_functions.copy().items():
-                    if remain.startswith(clean_str):
-                        probable_functions[fn_name] = remain[len(clean_str):]
-                    else:
-                        del probable_functions[fn_name]
-                if len(probable_functions) == 1:
-                    return list(probable_functions.keys())[0]
-                if len(probable_functions) == 0:
-                    break
-        return "fn_unknown"
+            for fn_name, remain in probable_functions.copy().items():
+                if remain.startswith(clean_str):
+                    probable_functions[fn_name] = remain[len(clean_str):]
+                else:
+                    del probable_functions[fn_name]
+            if len(probable_functions) == 1:
+                return list(probable_functions.keys())[0]
+            if len(probable_functions) == 0:
+                break
+
+        return "fn_unsupported_action"

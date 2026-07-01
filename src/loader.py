@@ -2,11 +2,12 @@ import json
 import sys
 from pathlib import Path
 from pydantic import ValidationError
-from src.schemas import FunctionDefinition, TestCase
+from src.schemas import FunctionDefinition, TestCase, ReturnDef
 from typing import Callable, Any, Dict
 
 
-def error_and_exit(function: Callable[[str], Any]) -> Callable[[str], Any]:
+def error_and_exit(function: Callable[[str], list[Any]]
+                   ) -> Callable[[str], list[Any]]:
     """Wrap a loader function so file and schema errors exit cleanly.
 
     Args:
@@ -68,6 +69,14 @@ def load_functions(filepath: str) -> list[FunctionDefinition]:
     """
     with open(filepath, 'r') as f:
         raw_data = json.load(f)
+
+    if not isinstance(raw_data, list):
+        print("Error: Expected a list of function definitions in "
+              f"'{filepath}'.")
+        sys.exit(1)
+    if not raw_data:
+        print(f"Error: No function definitions found in '{filepath}'.")
+        sys.exit(1)
     return [FunctionDefinition(**item) for item in raw_data]
 
 
@@ -86,6 +95,12 @@ def load_prompts(filepath: str) -> list[TestCase]:
     """
     with open(filepath, 'r') as f:
         raw_data = json.load(f)
+    if not isinstance(raw_data, list):
+        print(f"Error: Expected a list of test cases in '{filepath}'.")
+        sys.exit(1)
+    if not raw_data:
+        print(f"Error: No test cases found in '{filepath}'.")
+        sys.exit(1)
     return [TestCase(**item) for item in raw_data]
 
 
@@ -111,3 +126,34 @@ def save_results(filepath: str, data: list[Dict[str, Any]]) -> None:
         print(f"Error: Failed to save results to '{filepath}'.")
         print(e)
         sys.exit(1)
+
+
+def porobable_functions(functions: list[FunctionDefinition]
+                        ) -> Dict[str, FunctionDefinition]:
+    """Create a mapping of function names to themselves for tracking.
+
+    Args:
+        functions (list[FunctionDefinition]): List of function definitions.
+    Returns:
+        Dict[str, str]: Mapping of function names to themselves.
+                and additionally add a reserved entry for unsupported actions.
+    """
+    unsuported_fn = FunctionDefinition(
+            name="fn_unsupported_action",
+            description="Triggers ONLY when the user query "
+            "does not fit any other function. Use this for general questions, "
+            "conversational chitchat, weather, philosophy, math calculations.",
+            parameters={},
+            returns=ReturnDef(type="string"))
+    functions_map = {}
+    for func in functions:
+        if func.name in functions_map:
+            print(f"Error: Duplicate function name '{func.name}' found.")
+            sys.exit(1)
+        functions_map[func.name] = func
+    if "fn_unsupported_action" in functions_map:
+        print("Warning: 'fn_unsupported_action' is reserved for "
+              "unsupported queries. It will be overridden.")
+    functions_map["fn_unsupported_action"] = unsuported_fn
+    functions.append(unsuported_fn)
+    return functions_map

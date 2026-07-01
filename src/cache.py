@@ -1,7 +1,8 @@
 from typing import List, Dict
+from pydantic import BaseModel, model_validator, Field
 
 
-class RouterCache:
+class RouterCache(BaseModel):
     """Cache valid next-token IDs for allowed function-name prefixes.
 
     Args:
@@ -17,29 +18,14 @@ class RouterCache:
         None.
     """
 
-    def __init__(self, vocab_map: Dict[int, str], allowed_functions: List[str]
-                 ) -> None:
-        """Build the prefix cache for the allowed function names.
+    vocab: Dict[int, str]
+    allowed_functions: List[str]
+    valid_prefixes: Dict[str, List[int]] = Field(default={})
 
-        Args:
-            vocab_map (Dict[int, str]): Mapping from token IDs to token
-                strings.
-            allowed_functions (List[str]): Function names that may be
-                generated.
-
-        Returns:
-            None.
-
-        Raises:
-            None.
-        """
-        print("Initializing High-Speed Router Cache...")
-        self.vocab = vocab_map
-        self.allowed_functions = allowed_functions
-
-        self.valid_prefixes = self._build_prefix_cache(allowed_functions)
-        print(f"[SUCCESS] Router Cache locked for {len(allowed_functions)}"
-              " functions.")
+    @model_validator(mode="after")
+    def init(self) -> 'RouterCache':
+        self.valid_prefixes = self._build_prefix_cache(self.allowed_functions)
+        return self
 
     def _build_prefix_cache(self, functions: List[str]
                             ) -> Dict[str, List[int]]:
@@ -57,7 +43,8 @@ class RouterCache:
         """
         clean_vocab: Dict[str, List[int]] = {}
         for tid, tok_str in self.vocab.items():
-            clean = tok_str.replace("Ġ", " ").replace("\u0120", " ")
+            clean = (tok_str.replace("Ġ", " ").replace("Ċ", "\n")
+                     .replace("ĉ", "\t").replace("\r", "č"))
             if not clean:
                 continue
             if clean not in clean_vocab:
@@ -89,7 +76,7 @@ class RouterCache:
         """Return the allowed token IDs for the current emitted prefix.
 
         Args:
-            emitted_text (str): Text already generated after the pipe symbol.
+            emitted_text (str): Text already generated.
 
         Returns:
             List[int]: Valid token IDs for continuing the current prefix, or an

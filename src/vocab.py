@@ -1,15 +1,14 @@
 import json
 import sys
-import importlib
-from typing import Any
+from llm_sdk import Small_LLM_Model  # type: ignore[attr-defined]
+from pydantic import BaseModel, model_validator, ConfigDict
 
 
-class Vocabulary:
+class Vocabulary(BaseModel):
     """Load tokenizer vocabulary data and expose token lookup tables.
 
     Args:
-        llm_model (str | None): Optional Hugging Face model identifier.
-
+        None.
     Returns:
         None.
 
@@ -18,38 +17,22 @@ class Vocabulary:
         SystemExit: If the tokenizer vocabulary cannot be loaded.
     """
 
-    def __init__(self, llm_model: str | None = None) -> None:
-        """Initialize the model wrapper and load its tokenizer vocabulary.
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    llm: Small_LLM_Model | None = None
+    token_to_id: dict[str, int] = {}
+    id_to_token: dict[int, str] = {}
+    merge: dict[tuple[int, int], tuple[int, int]] = {}
 
-        Args:
-            llm_model (str | None): Optional Hugging Face model identifier.
-
-        Returns:
-            None.
-
-        Raises:
-            Exception: Propagates model-loading failures.
-            SystemExit: If the tokenizer vocabulary cannot be loaded.
-        """
-        print("Booting the LLM Engine...")
-
-        try:
-            # Bypass mypy errors
-            llm_mod = importlib.import_module("llm_sdk")
-            llm_cls = getattr(llm_mod, "Small_LLM_Model")
-        except Exception:
-            # Let runtime import errors surface normally
-            raise
-
-        if llm_model is not None:
-            self.llm: Any = llm_cls(model_name=llm_model)
-        else:
-            self.llm = llm_cls()
-
-        self.token_to_id: dict[str, int] = {}
-        self.id_to_token: dict[int, str] = {}
-
-        self._load()
+    @model_validator(mode="after")
+    def init(self) -> 'Vocabulary':
+        if self.llm is None:
+            self.llm = Small_LLM_Model()
+            self.token_to_id: dict[str, int] = {}
+            self.id_to_token: dict[int, str] = {}
+            # {(token_id_1, token_id_2): (merged_token_id, merge_rank)}
+            self.merge: dict[tuple[int, int], tuple[int, int]] = {}
+            self._load()
+        return self
 
     def _load(self) -> None:
         """Load tokenizer vocabulary data from the model repository.
@@ -65,18 +48,45 @@ class Vocabulary:
             Exception: Propagates unexpected download or file errors.
         """
         try:
-            tokenizer_path = self.llm.get_path_to_tokenizer_file()
-            with open(tokenizer_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            raw_vocab = data.get("model", {}).get("vocab", {})
-
-            if not raw_vocab:
-                print("Error: Could not extract vocabulary dictionary"
-                      " from tokenizer file.")
+            if self.llm is None:
+                print("Error: LLM model is not initialized.")
                 sys.exit(1)
+            vocab_path = self.llm.get_path_to_vocab_file()
+            with open(vocab_path, "r", encoding="utf-8") as f:
+                raw_vocab = json.load(f)
 
+            if not isinstance(raw_vocab, dict):
+                print("Error: Vocabulary file is not a valid JSON object.")
+                sys.exit(1)
+            if not all(isinstance(k, str) and isinstance(v, int)
+                       for k, v in raw_vocab.items()):
+                print("Error: Invalid token_to_id mapping in vocabulary.")
+                sys.exit(1)
             self.token_to_id = raw_vocab
             self.id_to_token = {v: k for k, v in raw_vocab.items()}
+
+            merge_path = self.llm.get_path_to_merges_file()
+            with open(merge_path, "r", encoding="utf-8") as f:
+                for i, line in enumerate(f):
+                    if i == 0:
+                        continue
+                    try:
+                        token1, token2 = line.strip().split()
+                    except ValueError:
+                        print(f"Error: Invalid merge line '{line}' "
+                              "in merges file.")
+                        sys.exit(1)
+                    if (token1 not in self.token_to_id
+                       or token2 not in self.token_to_id
+                       or (token1 + token2) not in self.token_to_id):
+                        print(f"Error: tokens in line '{line}'"
+                              " are not in the vocabulary.")
+                        sys.exit(1)
+                    token_id1 = self.token_to_id[token1]
+                    token_id2 = self.token_to_id[token2]
+                    merged_token = token1 + token2
+                    merged_token_id = self.token_to_id[merged_token]
+                    self.merge[(token_id1, token_id2)] = (merged_token_id, i)
         except Exception as e:
             print(f"Error loading tokenizer: {e}")
             sys.exit(1)

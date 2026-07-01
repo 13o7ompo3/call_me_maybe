@@ -1,16 +1,20 @@
 import numpy as np
 import copy
+from llm_sdk import Small_LLM_Model  # type: ignore[attr-defined]
+from os.path import commonprefix
 from typing import Dict, Any
 from src.vocab import Vocabulary
 from src.schemas import FunctionDefinition
+from src.tokeniser import Tokeniser
+from pydantic import BaseModel, ConfigDict
 import re
 
 
-class ExtractionGenerator:
+class ExtractionGenerator(BaseModel):
     """Extract function arguments from a user query with constrained decoding.
 
     Args:
-        llm (Any): Language model wrapper used for tokenization and
+        llm (Small_LLM_Model): Language model wrapper used for tokenization and
             logits.
         vocab (Vocabulary): Vocabulary helper that maps token IDs to strings.
         hints (Dict[str, Dict[str, str]]): Optional per-function extraction
@@ -23,25 +27,12 @@ class ExtractionGenerator:
         None.
     """
 
-    def __init__(self, llm: Any, vocab: Vocabulary,
-                 hints: Dict[str, Dict[str, str]]):
-        """Store the model, vocabulary, and extraction hints.
-
-        Args:
-            llm (Any): Language model wrapper used for inference.
-            vocab (Vocabulary): Vocabulary helper that maps token IDs to
-                strings.
-            hints (Dict[str, Dict[str, str]]): Optional extraction hints.
-
-        Returns:
-            None.
-
-        Raises:
-            None.
-        """
-        self.llm = llm
-        self.vocab = vocab
-        self.hints = hints
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    llm: Small_LLM_Model
+    vocab: Vocabulary
+    tokeniser: Tokeniser
+    hints: Dict[str, Dict[str, str]]
+    probable_argument: list[Dict[str, str]] = []
 
     def _build_prompt(self, user_query: str, func_name: str,
                       func_def: FunctionDefinition) -> str:
@@ -77,6 +68,11 @@ class ExtractionGenerator:
         prompt += "\nEXAMPLES:\n"
         prompt += "Query: 'What is the square root of 81?'\n<a>81</a>\n"
         prompt += "Query: 'Greet Alice'\n<name>Alice</name>\n"
+        prompt += ("Query: 'Replace all numbers in "
+                   "\"Hello 34 I'm 233 years old\" with NUMBERS'\n"
+                   "<source_string>Hello 34 I'm 233 years old</source_string>"
+                   "\n<regex>\\d+</regex>\n"
+                   "<replacement>NUMBERS</replacement>\n")
 
         prompt += f"\nUSER QUERY: {user_query}\nOUTPUT FORMAT:\n"
         for p_name in func_def.parameters.keys():
@@ -110,8 +106,7 @@ class ExtractionGenerator:
             return {}
 
         prompt = self._build_prompt(user_query, func_name, func_def)
-        input_tensor = self.llm.encode(prompt)
-        current_ids = input_tensor.tolist()[0]
+        current_ids = self.tokeniser.encode(prompt)
 
         keys = list(func_def.parameters.keys())
         current_index = 0
@@ -123,15 +118,14 @@ class ExtractionGenerator:
         generated_text = f"<{keys[0]}>"
         print(f"[EXTRACTION]\n\n{generated_text}", end="", flush=True)
 
-        # Standard greedy decoding loop
-        for step in range(100):
+        while True:  # Not safe anymore
             logits = self.llm.get_logits_from_input_ids(current_ids)
             next_id = int(np.argmax(logits))
             clean_str = self.vocab.id_to_token[next_id].replace(
-                "Ġ", " ").replace("\u0120", " ").replace("Ċ", "\n")
+                "Ġ", " ").replace("Ċ", "\n")
 
             current_ids.append(next_id)
-            generated_text += clean_str.lstrip()
+            generated_text += clean_str
             argument += clean_str
             print(clean_str, end="", flush=True)
 
@@ -150,7 +144,7 @@ class ExtractionGenerator:
 
                     prediction = f"{surviving_remainder}</{real_xml_tag}>\n"
 
-                    tokens = self.llm.encode(prediction).tolist()[0]
+                    tokens = self.tokeniser.encode(prediction)
                     current_ids.extend(tokens)
                     generated_text += prediction
                     print(prediction, end="", flush=True)
@@ -161,6 +155,16 @@ class ExtractionGenerator:
                         level[p_name] = p_remaining.lstrip()
                 if len(level) == 0:
                     probable_argument.remove(level)
+                prefix = commonprefix(list(level.values()))
+                if prefix:
+                    tokens = self.tokeniser.encode(prefix)
+                    current_ids.extend(tokens)
+                    generated_text += prefix
+                    print(prefix, end="", flush=True)
+                    for p_name, p_remaining in level.items():
+                        level[p_name] = p_remaining[len(prefix):]
+                    probable_argument = [level]
+                    break
 
             target_end_tag = f"</{keys[current_index]}>"
 
@@ -176,7 +180,7 @@ class ExtractionGenerator:
                 next_tag = f"<{keys[current_index]}>"
                 generated_text += next_tag
 
-                new_tokens = self.llm.encode(next_tag).tolist()[0]
+                new_tokens = self.tokeniser.encode(next_tag)
                 current_ids.extend(new_tokens)
                 print(next_tag, end="", flush=True)
 
@@ -209,17 +213,22 @@ class ExtractionGenerator:
             f = {"number": float, "integer": int}.get(p_data.type, str)
             if s_idx != -1 and e_idx != -1:
                 val_str = xml_string[s_idx + len(start_tag):e_idx].strip()
+                xml_string = xml_string[e_idx + len(end_tag):]
 
                 if p_data.type in ("number", "integer"):
                     try:
                         result[p_name] = f(val_str)
                     except ValueError:
                         result[p_name] = f(0)
+                elif p_data.type == "boolean":
+                    result[p_name] = val_str.lower() in ("true", "yes")
                 else:
                     result[p_name] = val_str
             else:
                 if p_data.type in ("number", "integer"):
                     result[p_name] = f(0)
+                elif p_data.type == "boolean":
+                    result[p_name] = False
                 else:
                     result[p_name] = ""
 

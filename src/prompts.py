@@ -19,10 +19,9 @@ def build_routing_prompt(user_query: str, functions: List[FunctionDefinition]
     """
     prompt = (
         "ROUTING ENGINE MODE ACTIVE.\n"
-        "Read the user query, extract 3 keywords to understand the intent,\
-         then output the function name.\n"
-        "Do not explain. Use the exact format: \
-        keyword1, keyword2, keyword3 | fn_name\n\n"
+        "Read the user query to understand the intent"
+        " then output the function name or fn_unsupported_action.\n"
+        "Do not explain. Use the exact format: function_name\n\n"
         "AVAILABLE FUNCTIONS:\n"
     )
 
@@ -30,11 +29,17 @@ def build_routing_prompt(user_query: str, functions: List[FunctionDefinition]
         prompt += f"- {f.name}: {f.description}\n, returns {f.returns}\n"
 
     prompt += "\nEXAMPLES:\n"
-    prompt += "Query: 'Say hello to Alice'\n\
-    ANALYSIS: greeting, welcome, person | fn_function\n"
+    prompt += ("Query: 'Hello there, who are you?'\nFunction: "
+               "fn_unsupported_action\n\n")
+    prompt += ("Query: 'What is the weather like today in Paris?'\nFunction: "
+               "fn_unsupported_action\n\n")
+    prompt += ("Query: 'Replace all numbers in \"Hello 34 I'm 233 years old\" "
+               "with NUMBERS'\nFunction: "
+               "fn_substitute_string_with_regex\n\n")
+    prompt += ("Query: 'Say hello to Alice'\nFunction: fn_greet\n\n")
 
     prompt += f"\nUSER QUERY: {user_query}\n"
 
-    prompt += "ANALYSIS: "
+    prompt += "Function: "
 
     return prompt
