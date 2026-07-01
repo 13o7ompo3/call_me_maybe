@@ -61,27 +61,36 @@ class FunctionCallingPipeline(BaseModel):
 
         print(f"\n--- Processing {len(prompts)} Test Cases ---")
         for i, test_case in enumerate(prompts):
-            print(f"[{i+1}/{len(prompts)}] Processing: {test_case.prompt}")
+            try:
+                print(f"[{i+1}/{len(prompts)}] Processing: {test_case.prompt}")
 
-            # Phase 1: Function name extraction
-            chosen_func_name = router.route(test_case.prompt, cache, functions)
-            print(f"\n\n  → function: {chosen_func_name}\n")
+                # Phase 1: Function name extraction
+                chosen_func_name = router.route(test_case.prompt,
+                                                cache, functions)
+                print(f"\n\n  → function: {chosen_func_name}\n")
 
-            # Phase 2: Argument extraction
-            extracted_args = {}
-            if chosen_func_name != "fn_unsupported_action":
-                extracted_args = extractor.extract(test_case.prompt,
-                                                   chosen_func_name,
-                                                   functions_map[
-                                                       chosen_func_name])
-            print(f"\n  → arguments: {extracted_args}\n")
+                # Phase 2: Argument extraction
+                extracted_args = {}
+                if chosen_func_name != "fn_unsupported_action":
+                    extracted_args = extractor.extract(test_case.prompt,
+                                                       chosen_func_name,
+                                                       functions_map[
+                                                        chosen_func_name])
+                print(f"\n  → arguments: {extracted_args}\n")
 
-            final_json = {
-                "prompt": test_case.prompt,
-                "name": chosen_func_name,
-                "parameters": extracted_args
-            }
-            results.append(final_json)
+                final_json = {
+                    "prompt": test_case.prompt,
+                    "name": chosen_func_name,
+                    "parameters": extracted_args
+                }
+                results.append(final_json)
+            except Exception as e:
+                print(f"\n[ERROR] {e}\n")
+                results.append({
+                    "prompt": test_case.prompt,
+                    "name": "fn_unsupported_action",
+                    "parameters": {}
+                })
 
         # 4. Save to Disk
         save_results(self.output_path, results)
