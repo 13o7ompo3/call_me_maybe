@@ -6,16 +6,13 @@
 This project is a lightweight Function Calling and Parameter Extraction Engine optimized for Micro-LLMs (< 1 Billion parameters). It translates natural language user queries into structured, executable JSON function calls.
 
 
-## Algorithm Explanation
+## Architecture & Algorithms
 
-The engine uses Constrained Decoding and Prefix Injection:
+* **Routing via Relative Probability**: Maps queries to functions by isolating allowed token logits and applying Softmax strictly over the allowed subset. If the highest allowed token probability falls below 0.6, the engine aborts and defaults to fn_unsupported_action.
 
-1. **Routing:** Maps the user query to the correct function using contextual logit masking (constrained decoding).
+* **Custom BPE Tokenizer**: A native Python implementation that handles BPE whitespace artifacts (Ġ, Ċ) directly within the routing loop.
 
-2. **Schema-Driven Tag Forcing:** The Python script forcefully injects XML start tags directly into the LLM's token buffer, forcing it to generate specific parameter values.
-
-3. **Lookahead Prefix Matching:** The engine pre-computes targets (quoted strings, pure numbers, constants) from the prompt. As the LLM generates tokens, a buffer tracks the output. If a match is detected, the Python script hijacks the generation, auto-completes the value, and injects the closing tag.
-
+* **Schema-Driven Tag Forcing**: Injects XML start tags directly into the token buffer to enforce specific parameter generation.
 
 ## Design Decisions
 
@@ -23,14 +20,10 @@ The engine uses Constrained Decoding and Prefix Injection:
 
 * **Boot-Time Parameter Grounding:** Aggressive, hardcoded hints are injected at runtime to guide the LLM and bypass type ambiguity without altering the core schema.
 
-* **O(1) Token Extension:** Token arrays are updated using `current_ids.extend()` instead of re-encoding the entire sequence, eliminating $O(N^2)$ bottlenecks.
-
-* **Deep Copying:** `copy.deepcopy()` is used to ensure state target dictionaries remain isolated and pristine across multiple parameter loops.
-
 
 ## Performance Analysis
 
-* **Accuracy:** Effectively handles complex edge cases, including double-escaped regex (`\\d+`) and strict quote matching, by delegating extraction to Python regex when applicable.
+* **Accuracy:** Relative probability thresholding and honeypots effectively eliminate false positives during function routing.
 
 * **Speed:** Lookahead prefix matching frequently cuts off the LLM after 1-2 tokens, drastically reducing inference latency.
 
@@ -44,7 +37,7 @@ The engine uses Constrained Decoding and Prefix Injection:
 
 ## Testing Strategy
 
-
+Softmax & Routing Thresholds: Evaluates the constrained decoding math. Tests ensure that when the isolated Softmax probability of the best *allowed* token falls below the `0.6` relative threshold, the engine successfully aborts the generation loop and falls back to `fn_unsupported_action`.
 
 ## Instructions
 
@@ -141,5 +134,5 @@ Extraction complete!
 
 ## Resources
 
-
-
+* **[Pydantic Documentation: Arbitrary Types & Validators](https://docs.pydantic.dev/latest/concepts/models/)** - For configuring `model_config` to accept custom LLM classes and managing post-initialization state.
+* **[Andrej Karpathy's minbpe](https://github.com/karpathy/minbpe)** - The gold standard reference for understanding the pure Python implementation of Byte-Pair Encoding.
